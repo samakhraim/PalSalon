@@ -18,7 +18,7 @@ const formatPhone = (user) => {
 }
 
 export function getUserColumns({ canManage, onDelete }) {
-  return [
+  const columns = [
     {
       key: "id",
       header: "ID",
@@ -61,7 +61,10 @@ export function getUserColumns({ canManage, onDelete }) {
       header: "Created At",
       render: (user) => formatDate(user.createdAt),
     },
-    {
+  ]
+
+  if (canManage) {
+    columns.push({
       key: "actions",
       header: "Actions",
       render: (user) => (
@@ -71,6 +74,8 @@ export function getUserColumns({ canManage, onDelete }) {
           onDelete={onDelete}
         />
       ),
-    },
-  ]
+    })
+  }
+
+  return columns
 }

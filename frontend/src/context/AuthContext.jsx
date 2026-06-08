@@ -1,7 +1,7 @@
-import { createContext, useEffect, useMemo, useState } from "react"
+import { createContext, useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
-import { logoutRequest } from "@/features/auth/authService"
+import { logoutRequest, meRequest } from "@/features/auth/authService"
 
 const AuthContext = createContext(null)
 
@@ -38,6 +38,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (!user) {
+      localStorage.removeItem(USER_STORAGE_KEY)
       return
     }
 
@@ -57,6 +58,33 @@ export function AuthProvider({ children }) {
     setToken(null)
     setUser(null)
   }
+
+  const refreshCurrentUser = useCallback(async () => {
+    if (!token) {
+      return null
+    }
+
+    try {
+      const nextUser = await meRequest()
+      setUser(nextUser)
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(nextUser))
+      return nextUser
+    } catch (error) {
+      clearAuth()
+      navigate("/login", { replace: true })
+      throw error
+    }
+  }, [navigate, token])
+
+  useEffect(() => {
+    if (!token) {
+      return
+    }
+
+    refreshCurrentUser().catch(() => {
+      // Failed auth refresh is handled by refreshCurrentUser.
+    })
+  }, [refreshCurrentUser, token])
 
   const logout = async () => {
     try {
@@ -82,8 +110,9 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(token),
       login,
       logout,
+      refreshCurrentUser,
     }),
-    [token, user]
+    [logout, refreshCurrentUser, token, user]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

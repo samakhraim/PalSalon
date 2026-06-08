@@ -9,10 +9,13 @@ import {
   getUserById,
   updateUser,
 } from "@/features/users/userService"
+import { useAuth } from "@/hooks/useAuth"
+import { hasPermission } from "@/utils/permissions"
 
 export default function EditUserPage() {
   const navigate = useNavigate()
   const { id } = useParams()
+  const { user: currentUser, refreshCurrentUser } = useAuth()
   const [user, setUser] = useState(null)
   const [roleOptions, setRoleOptions] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -45,7 +48,17 @@ export default function EditUserPage() {
     setIsSubmitting(true)
 
     try {
-      await updateUser(id, payload)
+      const updatedUser = await updateUser(id, payload)
+
+      if (currentUser?.id === updatedUser.id) {
+        const nextUser = await refreshCurrentUser()
+        navigate(
+          hasPermission(nextUser, "Users-view") ? "/users" : "/dashboard",
+          { replace: true }
+        )
+        return
+      }
+
       navigate("/users", { replace: true })
     } finally {
       setIsSubmitting(false)

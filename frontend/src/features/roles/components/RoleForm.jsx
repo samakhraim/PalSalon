@@ -57,6 +57,25 @@ export default function RoleForm({
     return groups
   }, [permissionOptions])
 
+  const allPermissionNames = useMemo(
+    () =>
+      (permissionOptions || []).map((permission) => permission.name || permission),
+    [permissionOptions]
+  )
+
+  const allSelected =
+    allPermissionNames.length > 0 &&
+    allPermissionNames.every((permissionName) =>
+      formValues.permissions.includes(permissionName)
+    )
+
+  const handleToggleAllPermissions = () => {
+    setFormValues((current) => ({
+      ...current,
+      permissions: allSelected ? [] : allPermissionNames,
+    }))
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
 
@@ -106,7 +125,17 @@ export default function RoleForm({
           </div>
 
           <div className="space-y-3">
-            <div className="text-sm font-medium">Permissions</div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm font-medium">Permissions</div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleToggleAllPermissions}
+                disabled={allPermissionNames.length === 0}
+              >
+                {allSelected ? "Clear All" : "Select All"}
+              </Button>
+            </div>
             <PermissionToggleGroup
               groups={groupedPermissions}
               selected={formValues.permissions}

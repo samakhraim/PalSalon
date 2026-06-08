@@ -9,7 +9,7 @@ const formatDate = (value) => {
 }
 
 export function getRoleColumns({ canManage, onDelete }) {
-  return [
+  const columns = [
     {
       key: "id",
       header: "ID",
@@ -30,7 +30,10 @@ export function getRoleColumns({ canManage, onDelete }) {
       header: "Created At",
       render: (role) => formatDate(role.createdAt),
     },
-    {
+  ]
+
+  if (canManage) {
+    columns.push({
       key: "actions",
       header: "Actions",
       render: (role) => (
@@ -40,6 +43,8 @@ export function getRoleColumns({ canManage, onDelete }) {
           onDelete={onDelete}
         />
       ),
-    },
-  ]
+    })
+  }
+
+  return columns
 }

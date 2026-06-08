@@ -5,10 +5,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import RoleForm from "@/features/roles/components/RoleForm"
 import { getPermissions, getRoleById, updateRole } from "@/features/roles/roleService"
+import { useAuth } from "@/hooks/useAuth"
+import { hasPermission } from "@/utils/permissions"
 
 export default function EditRolePage() {
   const navigate = useNavigate()
   const { id } = useParams()
+  const { refreshCurrentUser } = useAuth()
   const [role, setRole] = useState(null)
   const [permissionOptions, setPermissionOptions] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -42,7 +45,11 @@ export default function EditRolePage() {
 
     try {
       await updateRole(id, payload)
-      navigate("/roles", { replace: true })
+      const nextUser = await refreshCurrentUser()
+      navigate(
+        hasPermission(nextUser, "Role-view") ? "/roles" : "/dashboard",
+        { replace: true }
+      )
     } finally {
       setIsSubmitting(false)
     }
