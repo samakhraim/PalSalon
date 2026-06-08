@@ -33,7 +33,7 @@ export default function AppBreadcrumbs() {
         {items.map((item, index) => {
           const isLast = index === items.length - 1
 
-          return (
+          return [
             <BreadcrumbItem key={item.href}>
               {isLast ? (
                 <BreadcrumbPage>{item.label}</BreadcrumbPage>
@@ -42,9 +42,11 @@ export default function AppBreadcrumbs() {
                   <Link to={item.href}>{item.label}</Link>
                 </BreadcrumbLink>
               )}
-              {!isLast && <BreadcrumbSeparator />}
-            </BreadcrumbItem>
-          )
+            </BreadcrumbItem>,
+            !isLast ? (
+              <BreadcrumbSeparator key={`${item.href}-separator`} />
+            ) : null,
+          ]
         })}
       </BreadcrumbList>
     </Breadcrumb>

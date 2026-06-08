@@ -1,12 +1,13 @@
 import { Link, NavLink, useLocation } from "react-router-dom"
 import {
+  ChevronUp,
   LayoutDashboard,
-  LogIn,
   LogOut,
   Settings,
   Sparkles,
-  ChevronUp,
+  ShieldCheck,
   UserCircle2,
+  Users,
 } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -34,10 +35,22 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
+import { hasPermission } from "@/utils/permissions"
 
 const navigationItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/login", label: "Login", icon: LogIn },
+  {
+    to: "/users",
+    label: "Users",
+    icon: Users,
+    permission: "Users-view",
+  },
+  {
+    to: "/roles",
+    label: "Roles",
+    icon: ShieldCheck,
+    permission: "Role-view",
+  },
 ]
 
 function SidebarBrand() {
@@ -120,6 +133,12 @@ function SidebarUserMenu() {
 export default function AppSidebar() {
   const location = useLocation()
   const { open, isMobile } = useSidebar()
+  const { user } = useAuth()
+  const visibleNavigationItems = navigationItems.filter(
+    (item) => !item.permission || hasPermission(user, item.permission)
+  )
+  const isActiveRoute = (to) =>
+    location.pathname === to || location.pathname.startsWith(`${to}/`)
 
   return (
     <Sidebar>
@@ -132,11 +151,11 @@ export default function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map(({ to, label, icon: Icon }) => (
+              {visibleNavigationItems.map(({ to, label, icon: Icon }) => (
                 <SidebarMenuItem key={to}>
                   <SidebarMenuButton
                     asChild
-                    isActive={location.pathname === to}
+                    isActive={isActiveRoute(to)}
                     tooltip={label}
                   >
                     <NavLink to={to}>

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node src/server.js",
+    "dev": "node --watch src/server.js",
     "seed": "node src/database/seeders/user.seeder.js",
     "migrate": "sequelize-cli db:migrate",
     "migrate:undo": "sequelize-cli db:migrate:undo"
