@@ -1,2 +1,17 @@
-// placeholder for Sequelize connection
-export const connectDb = async ()=>{}
+import { Sequelize } from "sequelize"
+
+import { env } from "./env.js"
+
+export const sequelize = new Sequelize(env.dbName, env.dbUser, env.dbPassword, {
+  host: env.dbHost,
+  port: env.dbPort,
+  dialect: "mysql",
+  logging: false,
+})
+
+export const connectDb = async () => {
+  await sequelize.authenticate()
+  await sequelize.sync({ alter: true })
+
+  return sequelize
+}
