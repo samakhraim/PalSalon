@@ -2,6 +2,7 @@ import { Link, NavLink, useLocation } from "react-router-dom"
 import {
   LayoutDashboard,
   LogIn,
+  LogOut,
   Settings,
   Sparkles,
   ChevronUp,
@@ -32,6 +33,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useAuth } from "@/hooks/useAuth"
 
 const navigationItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -63,6 +65,15 @@ function SidebarBrand() {
 
 function SidebarUserMenu() {
   const { open, isMobile } = useSidebar()
+  const { user, logout } = useAuth()
+  const userLabel = user?.name || "PalSalon Admin"
+  const userSubLabel = user?.email || "owner@palsalon.local"
+  const avatarFallback = userLabel
+    .split(" ")
+    .map((part) => part.charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase()
 
   return (
     <DropdownMenu>
@@ -72,15 +83,13 @@ function SidebarUserMenu() {
           className="h-auto w-full justify-start gap-3 rounded-xl px-2 py-2 hover:bg-sidebar-accent"
         >
           <Avatar className="h-10 w-10">
-            <AvatarFallback>PS</AvatarFallback>
+            <AvatarFallback>{avatarFallback || "PS"}</AvatarFallback>
           </Avatar>
           {(open || isMobile) && (
             <>
               <div className="min-w-0 flex-1 text-left">
-                <p className="truncate text-sm font-medium">PalSalon Admin</p>
-                <p className="truncate text-xs text-sidebar-foreground/70">
-                  owner@palsalon.local
-                </p>
+                <p className="truncate text-sm font-medium">{userLabel}</p>
+                <p className="truncate text-xs text-sidebar-foreground/70">{userSubLabel}</p>
               </div>
               <ChevronUp className="h-4 w-4 opacity-70" />
             </>
@@ -99,11 +108,9 @@ function SidebarUserMenu() {
           Preferences
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link to="/login">
-            <LogIn className="mr-2 h-4 w-4" />
-            Login Page
-          </Link>
+        <DropdownMenuItem onClick={logout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

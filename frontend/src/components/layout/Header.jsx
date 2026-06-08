@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, Search, Sparkles } from "lucide-react"
+import { Bell, ChevronDown, LogOut, Search, Sparkles } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -18,8 +18,19 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function Header() {
+  const { user, logout } = useAuth()
+  const userLabel = user?.name || "PalSalon Admin"
+  const userSubLabel = user?.email || "Workspace"
+  const avatarFallback = userLabel
+    .split(" ")
+    .map((part) => part.charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase()
+
   return (
     <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
       <div className="flex h-16 items-center gap-3 px-4 md:px-6">
@@ -69,11 +80,11 @@ export default function Header() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-2 px-2">
                 <Avatar className="h-9 w-9">
-                  <AvatarFallback>PS</AvatarFallback>
+                  <AvatarFallback>{avatarFallback || "PS"}</AvatarFallback>
                 </Avatar>
                 <div className="hidden text-left md:block">
-                  <p className="text-sm font-medium">PalSalon Admin</p>
-                  <p className="text-xs text-muted-foreground">Workspace</p>
+                  <p className="text-sm font-medium">{userLabel}</p>
+                  <p className="text-xs text-muted-foreground">{userSubLabel}</p>
                 </div>
                 <ChevronDown className="hidden h-4 w-4 text-muted-foreground md:block" />
               </Button>
@@ -84,6 +95,11 @@ export default function Header() {
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Preferences</DropdownMenuItem>
               <DropdownMenuItem>Notifications</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
