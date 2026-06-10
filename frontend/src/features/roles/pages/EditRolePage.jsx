@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Skeleton } from "@/components/ui/skeleton"
-import RoleForm from "@/features/roles/components/RoleForm"
+import FormPage from "@/components/common/FormPage"
+import { getRoleFields } from "@/features/roles/config/roleFields"
 import { getPermissions, getRoleById, updateRole } from "@/features/roles/roleService"
 import { useAuth } from "@/hooks/useAuth"
 import { hasPermission } from "@/utils/permissions"
@@ -17,6 +16,10 @@ export default function EditRolePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+  const fields = useMemo(
+    () => getRoleFields({ permissionOptions }),
+    [permissionOptions]
+  )
 
   useEffect(() => {
     const loadData = async () => {
@@ -55,36 +58,25 @@ export default function EditRolePage() {
     }
   }
 
-  if (isLoading) {
-    return <Skeleton className="h-[420px] w-full rounded-xl" />
-  }
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Edit Role</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Update role naming and permission assignments.
-        </p>
-      </div>
-
-      {errorMessage && (
-        <Alert variant="destructive">
-          <AlertTitle>Failed to load role</AlertTitle>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
-
-      {role && (
-        <RoleForm
-          title="Role Details"
-          description="Edit the role and keep permission assignments in sync."
-          initialValues={role}
-          permissionOptions={permissionOptions}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-        />
-      )}
-    </div>
+    <FormPage
+      title="Edit Role"
+      description="Update role naming and permission assignments."
+      formTitle="Role Details"
+      formDescription="Edit the role and keep permission assignments in sync."
+      fields={fields}
+      initialValues={role}
+      onSubmit={handleSubmit}
+      isSubmitting={isSubmitting}
+      submitLabel="Save Role"
+      loading={isLoading}
+      error={errorMessage}
+      hideFormOnError
+      mode="edit"
+      transformValues={(values) => ({
+        name: values.name.trim(),
+        permissions: values.permissions || [],
+      })}
+    />
   )
 }

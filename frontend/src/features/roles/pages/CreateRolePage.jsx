@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Skeleton } from "@/components/ui/skeleton"
-import RoleForm from "@/features/roles/components/RoleForm"
+import FormPage from "@/components/common/FormPage"
+import { getRoleFields } from "@/features/roles/config/roleFields"
 import { createRole, getPermissions } from "@/features/roles/roleService"
 
 export default function CreateRolePage() {
@@ -12,6 +11,10 @@ export default function CreateRolePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+  const fields = useMemo(
+    () => getRoleFields({ permissionOptions }),
+    [permissionOptions]
+  )
 
   useEffect(() => {
     const loadPermissions = async () => {
@@ -43,33 +46,24 @@ export default function CreateRolePage() {
     }
   }
 
-  if (isLoading) {
-    return <Skeleton className="h-[420px] w-full rounded-xl" />
-  }
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Create Role</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Create a role and assign permissions from the backend registry.
-        </p>
-      </div>
-
-      {errorMessage && (
-        <Alert variant="destructive">
-          <AlertTitle>Failed to load form</AlertTitle>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
-
-      <RoleForm
-        title="Role Details"
-        description="Choose a role name and attach permissions."
-        permissionOptions={permissionOptions}
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-      />
-    </div>
+    <FormPage
+      title="Create Role"
+      description="Create a role and assign permissions from the backend registry."
+      formTitle="Role Details"
+      formDescription="Choose a role name and attach permissions."
+      fields={fields}
+      onSubmit={handleSubmit}
+      isSubmitting={isSubmitting}
+      submitLabel="Save Role"
+      loading={isLoading}
+      error={errorMessage}
+      hideFormOnError
+      mode="create"
+      transformValues={(values) => ({
+        name: values.name.trim(),
+        permissions: values.permissions || [],
+      })}
+    />
   )
 }

@@ -1,6 +1,7 @@
 import app from "./app.js"
 import { connectDb } from "./config/db.js"
 import { env } from "./config/env.js"
+import { ensureUploadFolders } from "./modules/media/media.helper.js"
 
 const logDatabaseError = (error) => {
   const connectionCode =
@@ -20,6 +21,7 @@ const logDatabaseError = (error) => {
 
 const startServer = async () => {
   try {
+    await ensureUploadFolders()
     await connectDb()
     console.log("Database connected successfully")
 

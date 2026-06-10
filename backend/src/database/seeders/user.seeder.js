@@ -5,6 +5,8 @@ import { Permission, Role, User } from "../../models/index.js"
 import { hashPassword } from "../../utils/hashPassword.js"
 
 const MINIMUM_PERMISSIONS = [
+  "Cities-view",
+  "Cities-manage",
   "Role-view",
   "Role-manage",
   "Users-view",

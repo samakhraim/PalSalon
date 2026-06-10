@@ -1,20 +1,11 @@
-import { useEffect, useMemo, useState } from "react"
-import { Link } from "react-router-dom"
-import { Plus } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Pencil, Trash2 } from "lucide-react"
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { useAuth } from "@/hooks/useAuth"
-import { getRoleColumns } from "@/features/roles/roleColumns"
-import RoleTable from "@/features/roles/components/RolesTable"
+import IndexPage from "@/components/common/IndexPage"
+import { roleColumns } from "@/features/roles/config/roleColumns"
 import { deleteRole, getRoles } from "@/features/roles/roleService"
-import { hasPermission } from "@/utils/permissions"
 
 export default function RolesPage() {
-  const { user } = useAuth()
-  const canManage = hasPermission(user, "Role-manage")
   const [roles, setRoles] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState("")
@@ -46,53 +37,37 @@ export default function RolesPage() {
     }
   }
 
-  const columns = useMemo(
-    () => getRoleColumns({ canManage, onDelete: handleDeleteRole }),
-    [canManage, handleDeleteRole]
-  )
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Roles</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Manage roles and permission groupings for dashboard access.
-          </p>
-        </div>
-        {canManage && (
-          <Button asChild>
-            <Link to="/roles/create">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Role
-            </Link>
-          </Button>
-        )}
-      </div>
-
-      {errorMessage && (
-        <Alert variant="destructive">
-          <AlertTitle>Roles request failed</AlertTitle>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Roles List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : (
-            <RoleTable data={roles} columns={columns} />
-          )}
-        </CardContent>
-      </Card>
-    </div>
+    <IndexPage
+      title="Roles"
+      description="Manage roles and permission groupings for dashboard access."
+      createLabel="Create Role"
+      createPath="/roles/create"
+      createPermission="Role-manage"
+      data={roles}
+      columns={roleColumns}
+      loading={isLoading}
+      error={errorMessage}
+      emptyMessage="No roles found."
+      actions={(role) => [
+        {
+          label: "Edit",
+          icon: Pencil,
+          to: `/roles/${role.id}/edit`,
+          permission: "Role-manage",
+        },
+        {
+          label: "Delete",
+          icon: Trash2,
+          destructive: true,
+          confirm: true,
+          confirmTitle: "Delete role",
+          confirmDescription: `This action will permanently remove the role ${role.name}.`,
+          confirmLabel: "Delete",
+          onClick: () => handleDeleteRole(role.id),
+          permission: "Role-manage",
+        },
+      ]}
+    />
   )
 }

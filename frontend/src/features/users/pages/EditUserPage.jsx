@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Skeleton } from "@/components/ui/skeleton"
-import UserForm from "@/features/users/components/UserForm"
+import FormPage from "@/components/common/FormPage"
+import { getUserFields } from "@/features/users/config/userFields"
 import {
   getAvailableRoles,
   getUserById,
@@ -21,6 +20,10 @@ export default function EditUserPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+  const fields = useMemo(
+    () => getUserFields({ roleOptions, mode: "edit" }),
+    [roleOptions]
+  )
 
   useEffect(() => {
     const loadData = async () => {
@@ -65,37 +68,36 @@ export default function EditUserPage() {
     }
   }
 
-  if (isLoading) {
-    return <Skeleton className="h-[420px] w-full rounded-xl" />
-  }
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Edit User</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Update profile details and role assignments.
-        </p>
-      </div>
+    <FormPage
+      title="Edit User"
+      description="Update profile details and role assignments."
+      formTitle="User Details"
+      formDescription="Edit the user and keep their role assignments in sync."
+      fields={fields}
+      initialValues={user}
+      onSubmit={handleSubmit}
+      isSubmitting={isSubmitting}
+      submitLabel="Update User"
+      loading={isLoading}
+      error={errorMessage}
+      hideFormOnError
+      mode="edit"
+      transformValues={(values) => {
+        const payload = {
+          name: values.name.trim(),
+          email: values.email.trim(),
+          phoneCountryCode: values.phoneCountryCode?.trim() || null,
+          phoneNumber: values.phoneNumber?.trim() || null,
+          roles: values.roles || [],
+        }
 
-      {errorMessage && (
-        <Alert variant="destructive">
-          <AlertTitle>Failed to load user</AlertTitle>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
+        if (values.password?.trim()) {
+          payload.password = values.password
+        }
 
-      {user && (
-        <UserForm
-          title="User Details"
-          description="Edit the user and keep their role assignments in sync."
-          initialValues={user}
-          roleOptions={roleOptions}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          isEdit
-        />
-      )}
-    </div>
+        return payload
+      }}
+    />
   )
 }

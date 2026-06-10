@@ -3,6 +3,7 @@ import {
   ChevronUp,
   LayoutDashboard,
   LogOut,
+  MapPin,
   Settings,
   Sparkles,
   ShieldCheck,
@@ -39,17 +40,24 @@ import { hasPermission } from "@/utils/permissions"
 
 const navigationItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+ 
+  {
+    to: "/roles",
+    label: "Roles",
+    icon: ShieldCheck,
+    permission: "Role-view",
+  },
   {
     to: "/users",
     label: "Users",
     icon: Users,
     permission: "Users-view",
   },
-  {
-    to: "/roles",
-    label: "Roles",
-    icon: ShieldCheck,
-    permission: "Role-view",
+   {
+    to: "/cities",
+    label: "Cities",
+    icon: MapPin,
+    permission: "Cities-view",
   },
 ]
 

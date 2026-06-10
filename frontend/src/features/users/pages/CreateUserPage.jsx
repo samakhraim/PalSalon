@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Skeleton } from "@/components/ui/skeleton"
-import UserForm from "@/features/users/components/UserForm"
+import FormPage from "@/components/common/FormPage"
+import { getUserFields } from "@/features/users/config/userFields"
 import { createUser, getAvailableRoles } from "@/features/users/userService"
 
 export default function CreateUserPage() {
@@ -12,6 +11,10 @@ export default function CreateUserPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+  const fields = useMemo(
+    () => getUserFields({ roleOptions, mode: "create" }),
+    [roleOptions]
+  )
 
   useEffect(() => {
     const loadOptions = async () => {
@@ -43,33 +46,28 @@ export default function CreateUserPage() {
     }
   }
 
-  if (isLoading) {
-    return <Skeleton className="h-[420px] w-full rounded-xl" />
-  }
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Create User</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Add a new admin-side user and assign roles from the backend.
-        </p>
-      </div>
-
-      {errorMessage && (
-        <Alert variant="destructive">
-          <AlertTitle>Failed to load form</AlertTitle>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
-
-      <UserForm
-        title="User Details"
-        description="Create a user and assign one or more roles."
-        roleOptions={roleOptions}
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-      />
-    </div>
+    <FormPage
+      title="Create User"
+      description="Add a new admin-side user and assign roles from the backend."
+      formTitle="User Details"
+      formDescription="Create a user and assign one or more roles."
+      fields={fields}
+      onSubmit={handleSubmit}
+      isSubmitting={isSubmitting}
+      submitLabel="Create User"
+      loading={isLoading}
+      error={errorMessage}
+      hideFormOnError
+      mode="create"
+      transformValues={(values) => ({
+        name: values.name.trim(),
+        email: values.email.trim(),
+        phoneCountryCode: values.phoneCountryCode?.trim() || null,
+        phoneNumber: values.phoneNumber?.trim() || null,
+        password: values.password,
+        roles: values.roles || [],
+      })}
+    />
   )
 }

@@ -5,6 +5,20 @@ export default function errorHandler(err, req, res, next) {
     return next(err)
   }
 
+  if (err.name === "MulterError") {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return errorResponse(res, {
+        statusCode: 400,
+        message: "File is too large",
+      })
+    }
+
+    return errorResponse(res, {
+      statusCode: 400,
+      message: err.message || "Upload failed",
+    })
+  }
+
   if (err.name === "SequelizeUniqueConstraintError") {
     return errorResponse(res, {
       statusCode: 409,
