@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import { Eye, EyeOff } from "lucide-react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import ImagePreview from "@/components/common/ImagePreview"
@@ -151,6 +152,7 @@ export default function FormRenderer({
   const [errorMessage, setErrorMessage] = useState("")
   const [files, setFiles] = useState({})
   const [previewUrls, setPreviewUrls] = useState({})
+  const [passwordVisibility, setPasswordVisibility] = useState({})
   const previousSyncedValuesRef = useRef(syncedInitialValues)
 
   const visibleFields = useMemo(
@@ -200,6 +202,7 @@ export default function FormRenderer({
     setFieldErrors({})
     setFiles({})
     setPreviewUrls({})
+    setPasswordVisibility({})
     setErrorMessage("")
   }, [syncedInitialValues])
 
@@ -231,6 +234,25 @@ export default function FormRenderer({
     }))
   }
 
+  const updateMultipleFieldValues = (entries) => {
+    setFormValues((current) => {
+      let nextValues = current
+
+      for (const [fieldName, value] of entries) {
+        nextValues = setNestedValue(nextValues, fieldName, value)
+      }
+
+      return nextValues
+    })
+  }
+
+  const clearFieldError = (fieldName) => {
+    setFieldErrors((current) => ({
+      ...current,
+      [fieldName]: "",
+    }))
+  }
+
   const updateFileValue = (fieldName, file) => {
     setFiles((current) => ({
       ...current,
@@ -238,10 +260,105 @@ export default function FormRenderer({
     }))
   }
 
+  const togglePasswordVisibility = (fieldName) => {
+    setPasswordVisibility((current) => ({
+      ...current,
+      [fieldName]: !current[fieldName],
+    }))
+  }
+
   const validateFields = () => {
     const nextErrors = {}
 
     for (const field of visibleFields) {
+      if (field.type === "countryPhoneGroup") {
+        const countryValue = getNestedValue(
+          formValues,
+          field.countryFieldName,
+          field.countryDefaultValue ?? ""
+        )
+        const codeValue = getNestedValue(
+          formValues,
+          field.codeFieldName,
+          field.codeDefaultValue ?? ""
+        )
+        const phoneValue = getNestedValue(
+          formValues,
+          field.phoneFieldName,
+          field.phoneDefaultValue ?? ""
+        )
+
+        if (field.required) {
+          if (!String(countryValue ?? "").trim()) {
+            nextErrors[field.name] = field.countryRequiredMessage || "Country is required."
+            continue
+          }
+
+          if (!String(codeValue ?? "").trim()) {
+            nextErrors[field.name] = field.codeRequiredMessage || "Phone code is required."
+            continue
+          }
+
+          if (!String(phoneValue ?? "").trim()) {
+            nextErrors[field.name] = field.phoneRequiredMessage || "Phone is required."
+            continue
+          }
+        }
+
+        if (field.validate) {
+          const validationError = field.validate(
+            { country: countryValue, code: codeValue, phone: phoneValue },
+            formValues,
+            { files, mode }
+          )
+
+          if (validationError) {
+            nextErrors[field.name] = validationError
+          }
+        }
+
+        continue
+      }
+
+      if (field.type === "phoneGroup") {
+        const codeValue = getNestedValue(
+          formValues,
+          field.codeFieldName,
+          field.codeDefaultValue ?? ""
+        )
+        const phoneValue = getNestedValue(
+          formValues,
+          field.phoneFieldName,
+          field.phoneDefaultValue ?? ""
+        )
+
+        if (field.required) {
+          if (!String(codeValue ?? "").trim()) {
+            nextErrors[field.name] = field.codeRequiredMessage || "Phone code is required."
+            continue
+          }
+
+          if (!String(phoneValue ?? "").trim()) {
+            nextErrors[field.name] = field.phoneRequiredMessage || "Phone is required."
+            continue
+          }
+        }
+
+        if (field.validate) {
+          const validationError = field.validate(
+            { code: codeValue, phone: phoneValue },
+            formValues,
+            { files, mode }
+          )
+
+          if (validationError) {
+            nextErrors[field.name] = validationError
+          }
+        }
+
+        continue
+      }
+
       const value = getNestedValue(formValues, field.name, getDefaultFieldValue(field))
 
       if (field.required && !hasValue(value, field, files)) {
@@ -537,7 +654,20 @@ export default function FormRenderer({
             id={fieldId}
             className="flex h-10 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none"
             value={value}
-            onChange={(event) => updateFieldValue(field.name, event.target.value)}
+            onChange={(event) => {
+              const nextValue = event.target.value
+              updateFieldValue(field.name, nextValue)
+
+              if (field.syncFields) {
+                const selectedOption =
+                  normalizedOptions.find((option) => option.value === nextValue) || null
+                const syncedEntries = field.syncFields(selectedOption, nextValue, formValues)
+
+                if (Array.isArray(syncedEntries) && syncedEntries.length > 0) {
+                  updateMultipleFieldValues(syncedEntries)
+                }
+              }
+            }}
           >
             <option value="">{field.placeholder || `Select ${field.label}`}</option>
             {normalizedOptions.map((option) => (
@@ -546,6 +676,137 @@ export default function FormRenderer({
               </option>
             ))}
           </select>
+          {fieldError && <p className="text-sm text-destructive">{fieldError}</p>}
+        </div>
+      )
+    }
+
+    if (field.type === "phoneGroup") {
+      const codeValue = getNestedValue(
+        formValues,
+        field.codeFieldName,
+        field.codeDefaultValue ?? ""
+      )
+      const phoneValue = getNestedValue(
+        formValues,
+        field.phoneFieldName,
+        field.phoneDefaultValue ?? ""
+      )
+
+      return (
+        <div key={field.name} className={`space-y-2 ${spanClassName}`.trim()}>
+          <Label htmlFor={fieldId}>
+            {field.label}
+            {field.required && <span className="text-destructive"> *</span>}
+          </Label>
+          <div className="flex items-start gap-3">
+            <Input
+              id={`${fieldId}-code`}
+              value={codeValue}
+              onChange={(event) => {
+                updateFieldValue(field.codeFieldName, event.target.value)
+                clearFieldError(field.name)
+              }}
+              placeholder={field.codePlaceholder || "+970"}
+              className="w-24 shrink-0"
+            />
+            <Input
+              id={`${fieldId}-phone`}
+              value={phoneValue}
+              onChange={(event) => {
+                updateFieldValue(field.phoneFieldName, event.target.value)
+                clearFieldError(field.name)
+              }}
+              placeholder={field.phonePlaceholder || "Phone number"}
+              className="flex-1"
+            />
+          </div>
+          {field.description && (
+            <p className="text-sm text-muted-foreground">{field.description}</p>
+          )}
+          {fieldError && <p className="text-sm text-destructive">{fieldError}</p>}
+        </div>
+      )
+    }
+
+    if (field.type === "countryPhoneGroup") {
+      const normalizedOptions = normalizeOptions(field.options)
+      const countryValue = getNestedValue(
+        formValues,
+        field.countryFieldName,
+        field.countryDefaultValue ?? ""
+      )
+      const codeValue = getNestedValue(
+        formValues,
+        field.codeFieldName,
+        field.codeDefaultValue ?? ""
+      )
+      const phoneValue = getNestedValue(
+        formValues,
+        field.phoneFieldName,
+        field.phoneDefaultValue ?? ""
+      )
+
+      return (
+        <div key={field.name} className={`space-y-2 ${spanClassName}`.trim()}>
+          <Label htmlFor={fieldId}>
+            {field.label}
+            {field.required && <span className="text-destructive"> *</span>}
+          </Label>
+          <div className="grid gap-3 md:grid-cols-2">
+            <select
+              id={`${fieldId}-country`}
+              className="flex h-10 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none"
+              value={countryValue}
+              onChange={(event) => {
+                const nextCountryValue = event.target.value
+                const selectedOption =
+                  normalizedOptions.find((option) => option.value === nextCountryValue) ||
+                  null
+
+                updateMultipleFieldValues([
+                  [field.countryFieldName, nextCountryValue],
+                  [field.codeFieldName, selectedOption?.phoneCode || ""],
+                ])
+                clearFieldError(field.name)
+              }}
+            >
+              <option value="">
+                {field.countryPlaceholder || "Select country"}
+              </option>
+              {normalizedOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            <div className="flex items-start gap-3">
+              <Input
+                id={`${fieldId}-code`}
+                value={codeValue}
+                onChange={(event) => {
+                  updateFieldValue(field.codeFieldName, event.target.value)
+                  clearFieldError(field.name)
+                }}
+                placeholder={field.codePlaceholder || "+970"}
+                className="w-24 shrink-0"
+              />
+              <Input
+                id={`${fieldId}-phone`}
+                value={phoneValue}
+                onChange={(event) => {
+                  updateFieldValue(field.phoneFieldName, event.target.value)
+                  clearFieldError(field.name)
+                }}
+                placeholder={field.phonePlaceholder || "Phone number"}
+                className="flex-1"
+              />
+            </div>
+          </div>
+          {field.description && (
+            <p className="text-sm text-muted-foreground">{field.description}</p>
+          )}
           {fieldError && <p className="text-sm text-destructive">{fieldError}</p>}
         </div>
       )
@@ -561,6 +822,13 @@ export default function FormRenderer({
       onChange: (event) => updateFieldValue(field.name, event.target.value),
     }
 
+    const isPasswordField = field.type === "password"
+    const resolvedInputType = isPasswordField
+      ? passwordVisibility[field.name]
+        ? "text"
+        : "password"
+      : field.type || "text"
+
     return (
       <div key={field.name} className={`space-y-2 ${spanClassName}`.trim()}>
         <Label htmlFor={fieldId}>
@@ -569,8 +837,32 @@ export default function FormRenderer({
         </Label>
         {field.type === "textarea" ? (
           <Textarea {...sharedProps} rows={field.rows || 4} />
+        ) : isPasswordField ? (
+          <div className="relative">
+            <Input
+              {...sharedProps}
+              type={resolvedInputType}
+              className="pr-11"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="absolute right-1 top-1/2 -translate-y-1/2"
+              onClick={() => togglePasswordVisibility(field.name)}
+            >
+              {passwordVisibility[field.name] ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+              <span className="sr-only">
+                {passwordVisibility[field.name] ? "Hide password" : "Show password"}
+              </span>
+            </Button>
+          </div>
         ) : (
-          <Input {...sharedProps} type={field.type || "text"} />
+          <Input {...sharedProps} type={resolvedInputType} />
         )}
         {field.description && (
           <p className="text-sm text-muted-foreground">{field.description}</p>

@@ -70,10 +70,6 @@ export default function CustomerModel(sequelize, DataTypes) {
         allowNull: false,
         defaultValue: false,
       },
-      image: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
     },
     {
       tableName: "customers",

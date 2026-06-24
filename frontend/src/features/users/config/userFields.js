@@ -13,16 +13,26 @@ export function getUserFields({ roleOptions = [], mode = "create" } = {}) {
       required: true,
     },
     {
+      name: "user_phone_group",
+      label: "Country Phone Code / Phone",
+      type: "phoneGroup",
+      required: true,
+      codeFieldName: "phoneCountryCode",
+      phoneFieldName: "phoneNumber",
+      codePlaceholder: "+970",
+      phonePlaceholder: "Phone number",
+      codeRequiredMessage: "Phone country code is required.",
+      phoneRequiredMessage: "Phone number is required.",
+    },
+    {
       name: "phoneCountryCode",
-      label: "Phone Country Code",
-      type: "text",
-      placeholder: "+970",
+      type: "hidden",
+      defaultValue: "",
     },
     {
       name: "phoneNumber",
-      label: "Phone Number",
-      type: "text",
-      placeholder: "599123456",
+      type: "hidden",
+      defaultValue: "",
     },
     {
       name: "password",
@@ -31,7 +41,28 @@ export function getUserFields({ roleOptions = [], mode = "create" } = {}) {
       required: mode === "create",
       description:
         mode === "edit" ? "Leave empty to keep the existing password." : undefined,
-      span: 2,
+    },
+    {
+      name: "confirm_password",
+      label: "Confirm Password",
+      type: "password",
+      required: mode === "create",
+      validate: (value, formValues) => {
+        const password = formValues.password?.trim() || ""
+        const confirmPassword = value?.trim() || ""
+
+        if (mode === "create" || password) {
+          if (!confirmPassword) {
+            return "Confirm Password is required."
+          }
+
+          if (confirmPassword !== password) {
+            return "Passwords do not match."
+          }
+        }
+
+        return ""
+      },
     },
     {
       name: "roles",

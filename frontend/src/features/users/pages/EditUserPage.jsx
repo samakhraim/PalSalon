@@ -24,6 +24,17 @@ export default function EditUserPage() {
     () => getUserFields({ roleOptions, mode: "edit" }),
     [roleOptions]
   )
+  const initialValues = useMemo(() => {
+    if (!user) {
+      return null
+    }
+
+    return {
+      ...user,
+      user_phone_group: "",
+      confirm_password: "",
+    }
+  }, [user])
 
   useEffect(() => {
     const loadData = async () => {
@@ -75,7 +86,7 @@ export default function EditUserPage() {
       formTitle="User Details"
       formDescription="Edit the user and keep their role assignments in sync."
       fields={fields}
-      initialValues={user}
+      initialValues={initialValues}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
       submitLabel="Update User"

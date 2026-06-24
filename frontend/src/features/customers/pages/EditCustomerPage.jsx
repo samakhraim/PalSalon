@@ -17,6 +17,18 @@ export default function EditCustomerPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const fields = useMemo(() => getCustomerFields({ mode: "edit" }), [])
+  const initialValues = useMemo(() => {
+    if (!customer) {
+      return null
+    }
+
+    return {
+      ...customer,
+      image: customer.imageUrl || "",
+      customer_phone_group: "",
+      confirm_password: "",
+    }
+  }, [customer])
 
   useEffect(() => {
     const loadCustomer = async () => {
@@ -39,14 +51,11 @@ export default function EditCustomerPage() {
     setIsSubmitting(true)
 
     try {
-      const nextPayload = { ...payload }
-
       if (files.image) {
-        const media = await replaceCustomerImage(id, files.image)
-        nextPayload.image = media.url
+        await replaceCustomerImage(id, files.image)
       }
 
-      await updateCustomer(id, nextPayload)
+      await updateCustomer(id, payload)
       navigate("/customers", { replace: true })
     } finally {
       setIsSubmitting(false)
@@ -60,7 +69,7 @@ export default function EditCustomerPage() {
       formTitle="Customer Details"
       formDescription="Edit customer profile information and active status."
       fields={fields}
-      initialValues={customer}
+      initialValues={initialValues}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
       submitLabel="Update Customer"
@@ -80,12 +89,14 @@ export default function EditCustomerPage() {
           phone: values.phone.trim(),
           email: values.email.trim(),
           isactive: values.isactive,
-          image: values.image?.trim() || null,
+          confirm_password: values.confirm_password,
         }
 
         if (values.password?.trim()) {
           payload.password = values.password
         }
+
+        delete payload.confirm_password
 
         return payload
       }}

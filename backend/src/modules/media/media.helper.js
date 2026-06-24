@@ -20,6 +20,7 @@ const DEFAULT_IMAGE_FILES = {
 }
 
 const MODEL_UPLOAD_DIRECTORIES = {
+  customer: "customers",
   user: "users",
   salon: "salons",
   service: "services",
@@ -82,6 +83,7 @@ export const ensureUploadFolders = async () => {
     UPLOADS_ROOT,
     getAbsoluteUploadPath("defaults"),
     getAbsoluteUploadPath("media"),
+    getAbsoluteUploadPath("customers"),
     getAbsoluteUploadPath("users"),
     getAbsoluteUploadPath("salons"),
     getAbsoluteUploadPath("services"),

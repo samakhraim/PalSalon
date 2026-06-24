@@ -23,8 +23,10 @@ export default function CreateCustomerPage() {
       last_name: "",
       country_phone_code: "",
       phone: "",
+      customer_phone_group: "",
       email: "",
       password: "",
+      confirm_password: "",
     }),
     []
   )
@@ -33,17 +35,11 @@ export default function CreateCustomerPage() {
     setIsSubmitting(true)
 
     try {
-      const createdCustomer = await createCustomer({
-        ...payload,
-        image: files.image ? null : payload.image,
-      })
+      const createdCustomer = await createCustomer(payload)
 
       if (files.image) {
         try {
-          const media = await uploadCustomerImage(createdCustomer.id, files.image)
-          await updateCustomer(createdCustomer.id, {
-            image: media.url,
-          })
+          await uploadCustomerImage(createdCustomer.id, files.image)
         } catch (error) {
           await deleteCustomer(createdCustomer.id)
           throw error
@@ -80,7 +76,6 @@ export default function CreateCustomerPage() {
         email: values.email.trim(),
         password: values.password,
         isactive: values.isactive,
-        image: values.image?.trim() || null,
       })}
     />
   )

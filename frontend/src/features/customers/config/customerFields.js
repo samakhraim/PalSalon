@@ -39,17 +39,26 @@ export function getCustomerFields({ mode = "create" } = {}) {
       required: true,
     },
     {
-      name: "country_phone_code",
-      label: "Country Phone Code",
-      type: "text",
+      name: "customer_phone_group",
+      label: "Country Phone Code / Phone",
+      type: "phoneGroup",
       required: true,
-      placeholder: "+970",
+      codeFieldName: "country_phone_code",
+      phoneFieldName: "phone",
+      codePlaceholder: "+970",
+      phonePlaceholder: "Phone number",
+      codeRequiredMessage: "Country phone code is required.",
+      phoneRequiredMessage: "Phone is required.",
+    },
+    {
+      name: "country_phone_code",
+      type: "hidden",
+      defaultValue: "",
     },
     {
       name: "phone",
-      label: "Phone",
-      type: "text",
-      required: true,
+      type: "hidden",
+      defaultValue: "",
     },
     {
       name: "email",
@@ -64,7 +73,28 @@ export function getCustomerFields({ mode = "create" } = {}) {
       required: mode === "create",
       description:
         mode === "edit" ? "Leave empty to keep the existing password." : undefined,
-      span: 2,
+    },
+    {
+      name: "confirm_password",
+      label: "Confirm Password",
+      type: "password",
+      required: mode === "create",
+      validate: (value, formValues) => {
+        const password = formValues.password?.trim() || ""
+        const confirmPassword = value?.trim() || ""
+
+        if (mode === "create" || password) {
+          if (!confirmPassword) {
+            return "Confirm Password is required."
+          }
+
+          if (confirmPassword !== password) {
+            return "Passwords do not match."
+          }
+        }
+
+        return ""
+      },
     },
   ]
 }

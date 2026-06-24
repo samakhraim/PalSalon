@@ -11,6 +11,19 @@ export default function CreateUserPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+  const initialValues = useMemo(
+    () => ({
+      name: "",
+      email: "",
+      phoneCountryCode: "",
+      phoneNumber: "",
+      user_phone_group: "",
+      password: "",
+      confirm_password: "",
+      roles: [],
+    }),
+    []
+  )
   const fields = useMemo(
     () => getUserFields({ roleOptions, mode: "create" }),
     [roleOptions]
@@ -53,6 +66,7 @@ export default function CreateUserPage() {
       formTitle="User Details"
       formDescription="Create a user and assign one or more roles."
       fields={fields}
+      initialValues={initialValues}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
       submitLabel="Create User"

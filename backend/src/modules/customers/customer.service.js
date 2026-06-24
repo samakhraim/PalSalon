@@ -1,4 +1,5 @@
 import { Customer } from "../../models/index.js"
+import { getFirstMedia } from "../media/media.helper.js"
 import { hashPassword } from "../../utils/hashPassword.js"
 
 const createHttpError = (message, statusCode) => {
@@ -19,19 +20,27 @@ const normalizeOptionalString = (value) => {
   return trimmedValue || null
 }
 
-const toCustomerResponse = (customer) => {
+const CUSTOMER_IMAGE_COLLECTION = "avatar"
+
+const toCustomerResponse = async (customer) => {
   if (!customer) {
     return null
   }
 
-  if (typeof customer.toSafeJSON === "function") {
-    return customer.toSafeJSON()
-  }
+  const values =
+    typeof customer.toSafeJSON === "function"
+      ? customer.toSafeJSON()
+      : (() => {
+          const plainValues = { ...customer.get({ plain: true }) }
+          delete plainValues.password
+          delete plainValues.email_otp
+          delete plainValues.phone_otp
 
-  const values = { ...customer.get({ plain: true }) }
-  delete values.password
-  delete values.email_otp
-  delete values.phone_otp
+          return plainValues
+        })()
+
+  const media = await getFirstMedia("Customer", customer.id, CUSTOMER_IMAGE_COLLECTION)
+  values.imageUrl = media?.url || null
 
   return values
 }
@@ -83,7 +92,7 @@ const listCustomers = async () => {
     order: [["created_at", "DESC"]],
   })
 
-  return customers.map(toCustomerResponse)
+  return Promise.all(customers.map(toCustomerResponse))
 }
 
 const getCustomerById = async (customerId) => {
@@ -108,7 +117,6 @@ const createCustomer = async (payload) => {
     phone: normalizedPhone,
     email: normalizedEmail,
     password: await hashPassword(payload.password),
-    image: normalizeOptionalString(payload.image),
     isactive: typeof payload.isactive === "boolean" ? payload.isactive : false,
   })
 
@@ -157,10 +165,6 @@ const updateCustomer = async (customerId, payload) => {
 
   if (payload.password) {
     customer.password = await hashPassword(payload.password)
-  }
-
-  if (payload.image !== undefined) {
-    customer.image = normalizeOptionalString(payload.image)
   }
 
   if (typeof payload.isactive === "boolean") {

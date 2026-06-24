@@ -14,7 +14,6 @@ const createCustomerBodySchema = z
     email: z.string().trim().email("A valid email address is required"),
     password: requiredTrimmedString("Password is required"),
     isactive: z.boolean().optional(),
-    image: optionalNullableString,
   })
   .strict()
 
@@ -42,7 +41,6 @@ export const updateCustomerSchema = z.object({
       email: z.string().trim().email("A valid email address is required").optional(),
       password: z.string().trim().min(1, "Password is required").optional(),
       isactive: z.boolean().optional(),
-      image: optionalNullableString,
     })
     .strict()
     .refine((value) => Object.keys(value).length > 0, {

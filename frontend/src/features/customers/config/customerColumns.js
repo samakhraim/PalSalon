@@ -5,7 +5,7 @@ export const customerColumns = [
     sortable: true,
   },
   {
-    key: "image",
+    key: "imageUrl",
     label: "Image",
     type: "image",
     alt: (customer) =>

@@ -34,7 +34,7 @@ export async function uploadCustomerImage(customerId, file) {
   formData.append("file", file)
   formData.append("modelType", "Customer")
   formData.append("modelId", String(customerId))
-  formData.append("collectionName", "image")
+  formData.append("collectionName", "avatar")
 
   const response = await api.post("/media/upload", formData, {
     headers: {
@@ -50,7 +50,7 @@ export async function replaceCustomerImage(customerId, file) {
   formData.append("file", file)
   formData.append("modelType", "Customer")
   formData.append("modelId", String(customerId))
-  formData.append("collectionName", "image")
+  formData.append("collectionName", "avatar")
 
   const response = await api.post("/media/replace", formData, {
     headers: {
