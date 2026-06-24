@@ -133,6 +133,30 @@ const sidebarSections = [
         ],
       },
       {
+        key: "customers",
+        type: "group",
+        label: "Customers",
+        icon: UserCircle2,
+        basePath: "/customers",
+        permissions: ["Customers-view", "Customers-manage"],
+        children: [
+          {
+            key: "customers-list",
+            label: "List",
+            to: "/customers",
+            permission: "Customers-view",
+            exact: true,
+          },
+          {
+            key: "customers-create",
+            label: "Add Customer",
+            to: "/customers/create",
+            permission: "Customers-manage",
+            exact: true,
+          },
+        ],
+      },
+      {
         key: "faqs",
         type: "group",
         label: "FAQ",

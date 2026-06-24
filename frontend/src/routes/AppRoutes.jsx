@@ -9,6 +9,9 @@ import CitiesPage from "@/features/cities/pages/CitiesPage"
 import CreateCityPage from "@/features/cities/pages/CreateCityPage"
 import EditCityPage from "@/features/cities/pages/EditCityPage"
 import ContactUsPage from "@/features/contactUs/pages/ContactUsPage"
+import CreateCustomerPage from "@/features/customers/pages/CreateCustomerPage"
+import CustomersPage from "@/features/customers/pages/CustomersPage"
+import EditCustomerPage from "@/features/customers/pages/EditCustomerPage"
 import DashboardPage from "@/features/dashboard/pages/DashboardPage"
 import CreateFaqPage from "@/features/faqs/pages/CreateFaqPage"
 import EditFaqPage from "@/features/faqs/pages/EditFaqPage"
@@ -53,6 +56,13 @@ export default function AppRoutes() {
           </Route>
           <Route element={<PermissionRoute permission="ContactUs-view" />}>
             <Route path="/contact-us" element={<ContactUsPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="Customers-view" />}>
+            <Route path="/customers" element={<CustomersPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="Customers-manage" />}>
+            <Route path="/customers/create" element={<CreateCustomerPage />} />
+            <Route path="/customers/:id/edit" element={<EditCustomerPage />} />
           </Route>
           <Route element={<PermissionRoute permission="FAQ-view" />}>
             <Route path="/faqs" element={<FaqsPage />} />
