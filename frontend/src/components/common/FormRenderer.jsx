@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import PermissionToggleGrid from "@/features/roles/components/PermissionToggleGrid"
 import { buildValuesFromFields, getNestedValue, setNestedValue } from "@/lib/object"
 
 const getFieldId = (fieldName) => fieldName.replace(/\./g, "-")
 const EMPTY_FIELDS = Object.freeze([])
 const EMPTY_INITIAL_VALUES = Object.freeze({})
+const IMAGE_STATUS_TOP_LAYOUT = "image-status-top"
 
 const isObject = (value) =>
   value !== null && typeof value === "object" && !Array.isArray(value)
@@ -70,6 +72,10 @@ const hasValue = (value, field, files) => {
     return Array.isArray(value) ? value.length > 0 : Boolean(value)
   }
 
+  if (field.type === "permissions-toggle-grid") {
+    return Array.isArray(value) ? value.length > 0 : Boolean(value)
+  }
+
   if (field.type === "image") {
     return Boolean(files[field.name] || value)
   }
@@ -119,6 +125,9 @@ export default function FormRenderer({
   submitLabel = "Save",
   mode = "create",
   transformValues,
+  layout = "default",
+  onCancel,
+  cancelLabel = "Cancel",
 }) {
   const normalizedFields = fields ?? EMPTY_FIELDS
   const normalizedInitialValues = initialValues ?? EMPTY_INITIAL_VALUES
@@ -139,6 +148,38 @@ export default function FormRenderer({
     () => normalizedFields.filter((field) => !field.hidden),
     [normalizedFields]
   )
+  const topMediaField = useMemo(() => {
+    if (layout !== IMAGE_STATUS_TOP_LAYOUT) {
+      return null
+    }
+
+    return (
+      visibleFields.find((field) => field.layoutArea === "mediaTop") ||
+      visibleFields.find((field) => field.type === "image") ||
+      null
+    )
+  }, [layout, visibleFields])
+  const topStatusField = useMemo(() => {
+    if (layout !== IMAGE_STATUS_TOP_LAYOUT) {
+      return null
+    }
+
+    return (
+      visibleFields.find((field) => field.layoutArea === "statusTop") ||
+      visibleFields.find((field) => field.type === "switch") ||
+      null
+    )
+  }, [layout, visibleFields])
+  const bodyFields = useMemo(() => {
+    if (layout !== IMAGE_STATUS_TOP_LAYOUT) {
+      return visibleFields
+    }
+
+    return visibleFields.filter(
+      (field) =>
+        field.name !== topMediaField?.name && field.name !== topStatusField?.name
+    )
+  }, [layout, topMediaField?.name, topStatusField?.name, visibleFields])
 
   useEffect(() => {
     if (areValuesEqual(previousSyncedValuesRef.current, syncedInitialValues)) {
@@ -287,6 +328,133 @@ export default function FormRenderer({
     )
   }
 
+  const renderSwitchField = (field, { compact = false } = {}) => {
+    const fieldId = getFieldId(field.name)
+    const value = getNestedValue(formValues, field.name, getDefaultFieldValue(field))
+    const fieldError = fieldErrors[field.name]
+    const spanClassName = field.span === 2 ? "md:col-span-2" : ""
+
+    if (compact) {
+      return (
+        <div key={field.name} className="w-full justify-self-end">
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Label htmlFor={fieldId} className="text-sm font-medium">
+              {field.label}
+              {field.required && <span className="text-destructive"> *</span>}
+            </Label>
+            <Switch
+              id={fieldId}
+              checked={Boolean(value)}
+              onCheckedChange={(checked) => updateFieldValue(field.name, checked)}
+            />
+          </div>
+          {fieldError && <p className="mt-2 text-right text-sm text-destructive">{fieldError}</p>}
+        </div>
+      )
+    }
+
+    return (
+      <div key={field.name} className={spanClassName}>
+        <div className="flex justify-end">
+          <div className="flex max-w-sm items-start gap-4 rounded-lg border p-4 text-right">
+            <div className="space-y-1">
+              <Label htmlFor={fieldId}>
+                {field.label}
+                {field.required && <span className="text-destructive"> *</span>}
+              </Label>
+              {field.description && (
+                <p className="text-sm text-muted-foreground">{field.description}</p>
+              )}
+            </div>
+            <Switch
+              id={fieldId}
+              checked={Boolean(value)}
+              onCheckedChange={(checked) => updateFieldValue(field.name, checked)}
+            />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const renderImageField = (field, { compact = false } = {}) => {
+    const fieldId = getFieldId(field.name)
+    const value = getNestedValue(formValues, field.name, getDefaultFieldValue(field))
+    const fieldError = fieldErrors[field.name]
+    const spanClassName = field.span === 2 ? "md:col-span-2" : ""
+
+    if (compact) {
+      return (
+        <div key={field.name} className="flex flex-col items-center gap-3 text-center">
+          <Input
+            id={fieldId}
+            type="file"
+            accept={field.accept || "image/*"}
+            className="sr-only"
+            onChange={(event) => updateFileValue(field.name, event.target.files?.[0] || null)}
+          />
+          <ImagePreview
+            image={previewUrls[field.name] || value}
+            alt={field.label}
+            width={field.previewWidth || 112}
+            height={field.previewHeight || 112}
+            variant={field.previewVariant || "avatar"}
+          />
+          <div className="space-y-1">
+            <Button asChild variant="outline" size="sm">
+              <label htmlFor={fieldId} className="cursor-pointer">
+                {field.uploadLabel || "Upload Image"}
+              </label>
+            </Button>
+            {field.description && (
+              <p className="text-xs text-muted-foreground">{field.description}</p>
+            )}
+            {files[field.name] && (
+              <p className="max-w-[220px] break-words text-xs text-muted-foreground">
+                {files[field.name].name}
+              </p>
+            )}
+            {fieldError && <p className="text-sm text-destructive">{fieldError}</p>}
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div key={field.name} className={`space-y-3 ${spanClassName}`.trim()}>
+        <div className="space-y-1">
+          <Label htmlFor={fieldId}>
+            {field.label}
+            {field.required && <span className="text-destructive"> *</span>}
+          </Label>
+          {field.description && (
+            <p className="text-sm text-muted-foreground">{field.description}</p>
+          )}
+        </div>
+        <Input
+          id={fieldId}
+          type="file"
+          accept={field.accept || "image/*"}
+          onChange={(event) => updateFileValue(field.name, event.target.files?.[0] || null)}
+        />
+        {files[field.name] && (
+          <p className="text-sm text-muted-foreground">
+            Selected file: {files[field.name].name}
+          </p>
+        )}
+        <div className="flex justify-center">
+          <ImagePreview
+            image={previewUrls[field.name] || value}
+            alt={field.label}
+            width={field.previewWidth || 220}
+            height={field.previewHeight || 160}
+          />
+        </div>
+        {fieldError && <p className="text-sm text-destructive">{fieldError}</p>}
+      </div>
+    )
+  }
+
   const renderField = (field) => {
     const fieldId = getFieldId(field.name)
     const value = getNestedValue(formValues, field.name, getDefaultFieldValue(field))
@@ -298,28 +466,7 @@ export default function FormRenderer({
     }
 
     if (field.type === "switch") {
-      return (
-        <div key={field.name} className={spanClassName}>
-          <div className="flex justify-end">
-            <div className="flex max-w-sm items-start gap-4 rounded-lg border p-4 text-right">
-              <div className="space-y-1">
-                <Label htmlFor={fieldId}>
-                  {field.label}
-                  {field.required && <span className="text-destructive"> *</span>}
-                </Label>
-                {field.description && (
-                  <p className="text-sm text-muted-foreground">{field.description}</p>
-                )}
-              </div>
-              <Switch
-                id={fieldId}
-                checked={Boolean(value)}
-                onCheckedChange={(checked) => updateFieldValue(field.name, checked)}
-              />
-            </div>
-          </div>
-        </div>
-      )
+      return renderSwitchField(field)
     }
 
     if (field.type === "toggleGroup" || field.type === "multiSelect") {
@@ -340,40 +487,23 @@ export default function FormRenderer({
       )
     }
 
-    if (field.type === "image") {
+    if (field.type === "permissions-toggle-grid") {
       return (
         <div key={field.name} className={`space-y-3 ${spanClassName}`.trim()}>
-          <div className="space-y-1">
-            <Label htmlFor={fieldId}>
-              {field.label}
-              {field.required && <span className="text-destructive"> *</span>}
-            </Label>
-            {field.description && (
-              <p className="text-sm text-muted-foreground">{field.description}</p>
-            )}
-          </div>
-          <Input
-            id={fieldId}
-            type="file"
-            accept={field.accept || "image/*"}
-            onChange={(event) => updateFileValue(field.name, event.target.files?.[0] || null)}
+          <PermissionToggleGrid
+            field={field}
+            fieldId={fieldId}
+            options={field.options}
+            value={value}
+            onChange={(nextValue) => updateFieldValue(field.name, nextValue)}
+            error={fieldError}
           />
-          {files[field.name] && (
-            <p className="text-sm text-muted-foreground">
-              Selected file: {files[field.name].name}
-            </p>
-          )}
-          <div className="flex justify-center">
-            <ImagePreview
-              image={previewUrls[field.name] || value}
-              alt={field.label}
-              width={field.previewWidth || 220}
-              height={field.previewHeight || 160}
-            />
-          </div>
-          {fieldError && <p className="text-sm text-destructive">{fieldError}</p>}
         </div>
       )
+    }
+
+    if (field.type === "image") {
+      return renderImageField(field)
     }
 
     if (field.type === "select") {
@@ -441,11 +571,28 @@ export default function FormRenderer({
         </Alert>
       )}
 
+      {layout === IMAGE_STATUS_TOP_LAYOUT && (topMediaField || topStatusField) && (
+        <div className="grid gap-6 md:grid-cols-[1fr_auto_1fr] md:items-start">
+          <div className="hidden md:block" />
+          <div className="flex justify-center">
+            {topMediaField ? renderImageField(topMediaField, { compact: true }) : null}
+          </div>
+          <div className="md:justify-self-end">
+            {topStatusField ? renderSwitchField(topStatusField, { compact: true }) : null}
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-4 md:grid-cols-2">
-        {visibleFields.map((field) => renderField(field))}
+        {bodyFields.map((field) => renderField(field))}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {cancelLabel}
+          </Button>
+        )}
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Saving..." : submitLabel}
         </Button>

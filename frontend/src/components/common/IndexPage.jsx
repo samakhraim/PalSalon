@@ -1,13 +1,10 @@
 import { useMemo } from "react"
-import { Link } from "react-router-dom"
-import { Plus } from "lucide-react"
 
 import ActionsDropdown from "@/components/common/ActionsDropdown"
 import DataTable from "@/components/common/DataTable"
 import PageHeader from "@/components/common/PageHeader"
-import PermissionButton from "@/components/common/PermissionButton"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAuth } from "@/hooks/useAuth"
+import { hasPermission } from "@/utils/permissions"
 
 export default function IndexPage({
   title,
@@ -22,8 +19,12 @@ export default function IndexPage({
   error,
   emptyMessage,
 }) {
+  const { user } = useAuth()
+  const canManage = Boolean(
+    createPermission ? hasPermission(user, createPermission) : createPath
+  )
   const extendedColumns = useMemo(() => {
-    if (!actions) {
+    if (!actions || !canManage) {
       return columns
     }
 
@@ -32,45 +33,32 @@ export default function IndexPage({
       {
         key: "actions",
         label: "Actions",
+        sortable: false,
+        searchable: false,
         render: (row) => <ActionsDropdown actions={actions(row)} />,
       },
     ]
-  }, [actions, columns])
+  }, [actions, canManage, columns])
 
   return (
     <div className="space-y-6">
       <PageHeader
         title={title}
         description={description}
-        action={
-          createLabel &&
-          createPath && (
-            <PermissionButton permission={createPermission}>
-              <Button asChild>
-                <Link to={createPath}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  {createLabel}
-                </Link>
-              </Button>
-            </PermissionButton>
-          )
-        }
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{title} List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            data={data}
-            columns={extendedColumns}
-            loading={loading}
-            error={error}
-            emptyMessage={emptyMessage}
-          />
-        </CardContent>
-      </Card>
+      <DataTable
+        title={`${title} List`}
+        data={data}
+        columns={extendedColumns}
+        loading={loading}
+        error={error}
+        emptyMessage={emptyMessage}
+        addButtonLabel={createLabel}
+        addButtonPath={createPath}
+        canCreate={canManage}
+        canManage={canManage}
+      />
     </div>
   )
 }

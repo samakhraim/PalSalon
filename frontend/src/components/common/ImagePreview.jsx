@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react"
-import { ImageOff } from "lucide-react"
+import { Camera, ImageOff } from "lucide-react"
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
 
 const apiBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api"
 const uploadsBaseUrl = apiBaseUrl.replace(/\/api\/?$/, "")
@@ -22,6 +25,7 @@ export default function ImagePreview({
   width = 220,
   height = 160,
   className = "",
+  variant = "default",
 }) {
   const resolvedImageUrl = resolveImageUrl(image)
   const [hasImageError, setHasImageError] = useState(false)
@@ -31,6 +35,31 @@ export default function ImagePreview({
   }, [resolvedImageUrl])
 
   const containerStyle = { width, height }
+
+  if (variant === "avatar") {
+    return (
+      <Avatar
+        className={cn(
+          "border border-border bg-muted shadow-sm",
+          !resolvedImageUrl || hasImageError ? "ring-4 ring-muted/60" : "",
+          className
+        )}
+        style={containerStyle}
+      >
+        {resolvedImageUrl && !hasImageError ? (
+          <AvatarImage
+            src={resolvedImageUrl}
+            alt={alt}
+            className="object-cover"
+            onError={() => setHasImageError(true)}
+          />
+        ) : null}
+        <AvatarFallback className="bg-muted/70 text-muted-foreground">
+          <Camera className="h-9 w-9" />
+        </AvatarFallback>
+      </Avatar>
+    )
+  }
 
   if (!resolvedImageUrl || hasImageError) {
     return (

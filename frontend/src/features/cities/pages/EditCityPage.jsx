@@ -76,6 +76,8 @@ export default function EditCityPage() {
       error={errorMessage}
       hideFormOnError
       mode="edit"
+      formLayout="image-status-top"
+      onCancel={() => navigate("/cities")}
       transformValues={(values) => ({
         name: {
           en: values.name.en.trim(),

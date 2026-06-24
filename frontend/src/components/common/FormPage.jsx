@@ -28,6 +28,9 @@ export default function FormPage({
   hideFormOnError = false,
   formTitle = "Details",
   formDescription,
+  formLayout = "default",
+  onCancel,
+  cancelLabel = "Cancel",
 }) {
   if (loading) {
     return <Skeleton className="h-[420px] w-full rounded-xl" />
@@ -63,6 +66,9 @@ export default function FormPage({
               submitLabel={submitLabel}
               mode={mode}
               transformValues={transformValues}
+              layout={formLayout}
+              onCancel={onCancel}
+              cancelLabel={cancelLabel}
             />
           </CardContent>
         </Card>

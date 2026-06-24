@@ -83,6 +83,8 @@ export default function CreateCityPage() {
       submitLabel="Create City"
       mode="create"
       transformValues={transformValues}
+      formLayout="image-status-top"
+      onCancel={() => navigate("/cities")}
     />
   )
 }
