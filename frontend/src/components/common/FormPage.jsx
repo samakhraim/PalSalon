@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
+const EMPTY_FIELDS = Object.freeze([])
+const EMPTY_INITIAL_VALUES = Object.freeze({})
+
 export default function FormPage({
   title,
   description,
@@ -31,6 +34,8 @@ export default function FormPage({
   }
 
   const shouldRenderForm = !(hideFormOnError && error)
+  const resolvedFields = fields ?? EMPTY_FIELDS
+  const resolvedInitialValues = initialValues ?? EMPTY_INITIAL_VALUES
 
   return (
     <div className="space-y-6">
@@ -51,8 +56,8 @@ export default function FormPage({
           </CardHeader>
           <CardContent>
             <FormRenderer
-              fields={fields}
-              initialValues={initialValues}
+              fields={resolvedFields}
+              initialValues={resolvedInitialValues}
               onSubmit={onSubmit}
               isSubmitting={isSubmitting}
               submitLabel={submitLabel}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import FormPage from "@/components/common/FormPage"
@@ -14,8 +14,36 @@ export default function CreateCityPage() {
   const navigate = useNavigate()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const fields = useMemo(() => getCityFields(), [])
+  const initialValues = useMemo(
+    () => ({
+      name: {
+        en: "",
+        ar: "",
+      },
+      description: {
+        en: "",
+        ar: "",
+      },
+      image: "",
+      status: true,
+    }),
+    []
+  )
 
-  const handleSubmit = async (payload, { files }) => {
+  const transformValues = useCallback((values) => ({
+    name: {
+      en: values.name.en.trim(),
+      ar: values.name.ar.trim(),
+    },
+    description: {
+      en: values.description.en.trim(),
+      ar: values.description.ar.trim(),
+    },
+    image: values.image?.trim() || null,
+    status: values.status,
+  }), [])
+
+  const handleSubmit = useCallback(async (payload, { files }) => {
     setIsSubmitting(true)
 
     try {
@@ -40,7 +68,7 @@ export default function CreateCityPage() {
     } finally {
       setIsSubmitting(false)
     }
-  }
+  }, [navigate])
 
   return (
     <FormPage
@@ -49,22 +77,12 @@ export default function CreateCityPage() {
       formTitle="City Details"
       formDescription="Create a city and decide whether it should be visible elsewhere later."
       fields={fields}
+      initialValues={initialValues}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
       submitLabel="Create City"
       mode="create"
-      transformValues={(values) => ({
-        name: {
-          en: values.name.en.trim(),
-          ar: values.name.ar.trim(),
-        },
-        description: {
-          en: values.description.en.trim(),
-          ar: values.description.ar.trim(),
-        },
-        image: values.image?.trim() || null,
-        status: values.status,
-      })}
+      transformValues={transformValues}
     />
   )
 }

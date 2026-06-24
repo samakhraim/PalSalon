@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import ImagePreview from "@/components/common/ImagePreview"
@@ -10,6 +10,38 @@ import { Textarea } from "@/components/ui/textarea"
 import { buildValuesFromFields, getNestedValue, setNestedValue } from "@/lib/object"
 
 const getFieldId = (fieldName) => fieldName.replace(/\./g, "-")
+const EMPTY_FIELDS = Object.freeze([])
+const EMPTY_INITIAL_VALUES = Object.freeze({})
+
+const isObject = (value) =>
+  value !== null && typeof value === "object" && !Array.isArray(value)
+
+const areValuesEqual = (left, right) => {
+  if (Object.is(left, right)) {
+    return true
+  }
+
+  if (Array.isArray(left) && Array.isArray(right)) {
+    if (left.length !== right.length) {
+      return false
+    }
+
+    return left.every((item, index) => areValuesEqual(item, right[index]))
+  }
+
+  if (isObject(left) && isObject(right)) {
+    const leftKeys = Object.keys(left)
+    const rightKeys = Object.keys(right)
+
+    if (leftKeys.length !== rightKeys.length) {
+      return false
+    }
+
+    return leftKeys.every((key) => areValuesEqual(left[key], right[key]))
+  }
+
+  return false
+}
 
 const getDefaultFieldValue = (field) => {
   if (field.defaultValue !== undefined) {
@@ -80,34 +112,46 @@ const groupOptions = (field, options = []) => {
 }
 
 export default function FormRenderer({
-  fields = [],
-  initialValues = {},
+  fields = EMPTY_FIELDS,
+  initialValues = EMPTY_INITIAL_VALUES,
   onSubmit,
   isSubmitting = false,
   submitLabel = "Save",
   mode = "create",
   transformValues,
 }) {
+  const normalizedFields = fields ?? EMPTY_FIELDS
+  const normalizedInitialValues = initialValues ?? EMPTY_INITIAL_VALUES
+  const syncedInitialValues = useMemo(
+    () => buildValuesFromFields(normalizedFields, normalizedInitialValues),
+    [normalizedFields, normalizedInitialValues]
+  )
   const [formValues, setFormValues] = useState(() =>
-    buildValuesFromFields(fields, initialValues)
+    syncedInitialValues
   )
   const [fieldErrors, setFieldErrors] = useState({})
   const [errorMessage, setErrorMessage] = useState("")
   const [files, setFiles] = useState({})
   const [previewUrls, setPreviewUrls] = useState({})
+  const previousSyncedValuesRef = useRef(syncedInitialValues)
 
   const visibleFields = useMemo(
-    () => fields.filter((field) => !field.hidden),
-    [fields]
+    () => normalizedFields.filter((field) => !field.hidden),
+    [normalizedFields]
   )
 
   useEffect(() => {
-    setFormValues(buildValuesFromFields(fields, initialValues))
+    if (areValuesEqual(previousSyncedValuesRef.current, syncedInitialValues)) {
+      return
+    }
+
+    previousSyncedValuesRef.current = syncedInitialValues
+    setFormValues(syncedInitialValues)
     setFieldErrors({})
     setFiles({})
     setPreviewUrls({})
     setErrorMessage("")
-  }, [fields, initialValues])
+  }, [syncedInitialValues])
 
   useEffect(() => {
     const nextPreviewUrls = {}

@@ -15,6 +15,41 @@ const normalizeOptionalString = (value) => {
   return trimmedValue || null
 }
 
+const parseJsonValue = (value) => {
+  if (value === undefined || value === null) {
+    return null
+  }
+
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value)
+    } catch {
+      return null
+    }
+  }
+
+  return typeof value === "object" ? value : null
+}
+
+const normalizeLocalizedObject = (value, { required = false } = {}) => {
+  const parsedValue = parseJsonValue(value)
+
+  if (!parsedValue) {
+    return required ? { en: "", ar: "" } : null
+  }
+
+  const normalizedValue = {
+    en: typeof parsedValue.en === "string" ? parsedValue.en : "",
+    ar: typeof parsedValue.ar === "string" ? parsedValue.ar : "",
+  }
+
+  if (required) {
+    return normalizedValue
+  }
+
+  return normalizedValue.en || normalizedValue.ar ? normalizedValue : null
+}
+
 const normalizeLocalizedName = (name) => ({
   en: name.en.trim(),
   ar: name.ar.trim(),
@@ -41,8 +76,8 @@ const normalizeLocalizedDescription = (description, currentDescription = null) =
 
 const toCityResponse = (city) => ({
   id: city.id,
-  name: city.name,
-  description: city.description,
+  name: normalizeLocalizedObject(city.name, { required: true }),
+  description: normalizeLocalizedObject(city.description),
   image: city.image,
   status: Boolean(city.status),
   createdAt: city.createdAt,
@@ -85,18 +120,20 @@ const createCity = async (payload) => {
 
 const updateCity = async (cityId, payload) => {
   const city = await getCityInstanceById(cityId)
+  const currentName = normalizeLocalizedObject(city.name, { required: true })
+  const currentDescription = normalizeLocalizedObject(city.description)
 
   if (payload.name) {
     city.name = {
-      en: payload.name.en?.trim() ?? city.name?.en ?? "",
-      ar: payload.name.ar?.trim() ?? city.name?.ar ?? "",
+      en: payload.name.en?.trim() ?? currentName.en,
+      ar: payload.name.ar?.trim() ?? currentName.ar,
     }
   }
 
   if (payload.description !== undefined) {
     city.description = normalizeLocalizedDescription(
       payload.description,
-      city.description
+      currentDescription
     )
   }
 
