@@ -31,6 +31,10 @@ export default function FormPage({
   formLayout = "default",
   onCancel,
   cancelLabel = "Cancel",
+  successMessage,
+  createSuccessMessage,
+  updateSuccessMessage,
+  submitErrorMessage,
 }) {
   if (loading) {
     return <Skeleton className="h-[420px] w-full rounded-xl" />
@@ -69,6 +73,10 @@ export default function FormPage({
               layout={formLayout}
               onCancel={onCancel}
               cancelLabel={cancelLabel}
+              successMessage={successMessage}
+              createSuccessMessage={createSuccessMessage}
+              updateSuccessMessage={updateSuccessMessage}
+              submitErrorMessage={submitErrorMessage}
             />
           </CardContent>
         </Card>

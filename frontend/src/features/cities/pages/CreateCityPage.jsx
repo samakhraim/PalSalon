@@ -85,6 +85,7 @@ export default function CreateCityPage() {
       transformValues={transformValues}
       formLayout="image-status-top"
       onCancel={() => navigate("/cities")}
+      createSuccessMessage="City created successfully."
     />
   )
 }

@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/hooks/useAuth"
+import { useToastMessage } from "@/hooks/useToastMessage"
 import { loginRequest } from "@/features/auth/authService"
 import { validateLoginInput } from "@/features/auth/authValidation"
 
@@ -21,6 +22,7 @@ export default function LoginForm() {
   const navigate = useNavigate()
   const location = useLocation()
   const { login } = useAuth()
+  const { showError, showSuccess } = useToastMessage()
   const [email, setEmail] = useState("admin@palsalon.com")
   const [password, setPassword] = useState("password")
   const [errorMessage, setErrorMessage] = useState("")
@@ -52,11 +54,11 @@ export default function LoginForm() {
       }
 
       login(payload)
+      showSuccess("Logged in successfully.")
       navigate(redirectTo, { replace: true })
     } catch (error) {
-      setErrorMessage(
-        error?.response?.data?.message || "Invalid email or password"
-      )
+      const message = showError(error, "Invalid email or password")
+      setErrorMessage(message)
     } finally {
       setIsLoading(false)
     }

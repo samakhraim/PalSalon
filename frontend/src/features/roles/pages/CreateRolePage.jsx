@@ -60,6 +60,7 @@ export default function CreateRolePage() {
       error={errorMessage}
       hideFormOnError
       mode="create"
+      createSuccessMessage="Role created successfully."
       transformValues={(values) => ({
         name: values.name.trim(),
         permissions: values.permissions || [],

@@ -83,6 +83,7 @@ export default function EditUserPage() {
       error={errorMessage}
       hideFormOnError
       mode="edit"
+      updateSuccessMessage="User updated successfully."
       transformValues={(values) => {
         const payload = {
           name: values.name.trim(),

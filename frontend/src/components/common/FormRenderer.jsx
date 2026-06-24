@@ -8,6 +8,10 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import PermissionToggleGrid from "@/features/roles/components/PermissionToggleGrid"
+import { useToastMessage } from "@/hooks/useToastMessage"
+import {
+  resolveSubmitSuccessMessage,
+} from "@/lib/notifications"
 import { buildValuesFromFields, getNestedValue, setNestedValue } from "@/lib/object"
 
 const getFieldId = (fieldName) => fieldName.replace(/\./g, "-")
@@ -128,7 +132,12 @@ export default function FormRenderer({
   layout = "default",
   onCancel,
   cancelLabel = "Cancel",
+  successMessage,
+  createSuccessMessage,
+  updateSuccessMessage,
+  submitErrorMessage = "Something went wrong. Please try again.",
 }) {
+  const { showError, showSuccess } = useToastMessage()
   const normalizedFields = fields ?? EMPTY_FIELDS
   const normalizedInitialValues = initialValues ?? EMPTY_INITIAL_VALUES
   const syncedInitialValues = useMemo(
@@ -272,8 +281,17 @@ export default function FormRenderer({
 
     try {
       await onSubmit(payload, { files, values: formValues, mode })
+      showSuccess(
+        resolveSubmitSuccessMessage({
+          mode,
+          successMessage,
+          createSuccessMessage,
+          updateSuccessMessage,
+        })
+      )
     } catch (error) {
-      setErrorMessage(error?.response?.data?.message || "Unable to save")
+      const message = showError(error, submitErrorMessage)
+      setErrorMessage(message)
     }
   }
 

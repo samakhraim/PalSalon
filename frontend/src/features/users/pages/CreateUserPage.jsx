@@ -60,6 +60,7 @@ export default function CreateUserPage() {
       error={errorMessage}
       hideFormOnError
       mode="create"
+      createSuccessMessage="User created successfully."
       transformValues={(values) => ({
         name: values.name.trim(),
         email: values.email.trim(),

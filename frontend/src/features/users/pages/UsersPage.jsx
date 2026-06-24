@@ -4,8 +4,10 @@ import { Pencil, Trash2 } from "lucide-react"
 import IndexPage from "@/components/common/IndexPage"
 import { userColumns } from "@/features/users/config/userColumns"
 import { deleteUser, getUsers } from "@/features/users/userService"
+import { useToastMessage } from "@/hooks/useToastMessage"
 
 export default function UsersPage() {
+  const { showError, showSuccess } = useToastMessage()
   const [users, setUsers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState("")
@@ -31,9 +33,10 @@ export default function UsersPage() {
   const handleDeleteUser = async (userId) => {
     try {
       await deleteUser(userId)
+      showSuccess("User deleted successfully.")
       await loadUsers()
     } catch (error) {
-      setErrorMessage(error?.response?.data?.message || "Unable to delete user")
+      setErrorMessage(showError(error, "Unable to delete user"))
     }
   }
 

@@ -4,8 +4,10 @@ import { Pencil, Trash2 } from "lucide-react"
 import IndexPage from "@/components/common/IndexPage"
 import { roleColumns } from "@/features/roles/config/roleColumns"
 import { deleteRole, getRoles } from "@/features/roles/roleService"
+import { useToastMessage } from "@/hooks/useToastMessage"
 
 export default function RolesPage() {
+  const { showError, showSuccess } = useToastMessage()
   const [roles, setRoles] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState("")
@@ -31,9 +33,10 @@ export default function RolesPage() {
   const handleDeleteRole = async (roleId) => {
     try {
       await deleteRole(roleId)
+      showSuccess("Role deleted successfully.")
       await loadRoles()
     } catch (error) {
-      setErrorMessage(error?.response?.data?.message || "Unable to delete role")
+      setErrorMessage(showError(error, "Unable to delete role"))
     }
   }
 

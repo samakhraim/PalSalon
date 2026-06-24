@@ -73,6 +73,7 @@ export default function EditRolePage() {
       error={errorMessage}
       hideFormOnError
       mode="edit"
+      updateSuccessMessage="Role updated successfully."
       transformValues={(values) => ({
         name: values.name.trim(),
         permissions: values.permissions || [],

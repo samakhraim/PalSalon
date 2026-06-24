@@ -2,6 +2,7 @@ import { createContext, useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { logoutRequest, meRequest } from "@/features/auth/authService"
+import { useToastMessage } from "@/hooks/useToastMessage"
 
 const AuthContext = createContext(null)
 
@@ -25,6 +26,7 @@ const getStoredUser = () => {
 
 export function AuthProvider({ children }) {
   const navigate = useNavigate()
+  const { showInfo } = useToastMessage()
   const [user, setUser] = useState(() => getStoredUser())
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_STORAGE_KEY))
 
@@ -97,6 +99,7 @@ export function AuthProvider({ children }) {
       clearAuth()
     }
 
+    showInfo("Logged out successfully.")
     navigate("/login", { replace: true })
   }
 

@@ -8,8 +8,10 @@ import {
   getCities,
   toggleCityStatus,
 } from "@/features/cities/cityService"
+import { useToastMessage } from "@/hooks/useToastMessage"
 
 export default function CitiesPage() {
+  const { showError, showSuccess } = useToastMessage()
   const [cities, setCities] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState("")
@@ -35,20 +37,20 @@ export default function CitiesPage() {
   const handleDeleteCity = async (cityId) => {
     try {
       await deleteCity(cityId)
+      showSuccess("City deleted successfully.")
       await loadCities()
     } catch (error) {
-      setErrorMessage(error?.response?.data?.message || "Unable to delete city")
+      setErrorMessage(showError(error, "Unable to delete city"))
     }
   }
 
   const handleToggleStatus = async (cityId) => {
     try {
       await toggleCityStatus(cityId)
+      showSuccess("City updated successfully.")
       await loadCities()
     } catch (error) {
-      setErrorMessage(
-        error?.response?.data?.message || "Unable to update city status"
-      )
+      setErrorMessage(showError(error, "Unable to update city status"))
     }
   }
 

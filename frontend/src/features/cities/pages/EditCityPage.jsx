@@ -78,6 +78,7 @@ export default function EditCityPage() {
       mode="edit"
       formLayout="image-status-top"
       onCancel={() => navigate("/cities")}
+      updateSuccessMessage="City updated successfully."
       transformValues={(values) => ({
         name: {
           en: values.name.en.trim(),
