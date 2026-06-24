@@ -25,11 +25,6 @@ export const salonOwnerColumns = [
     sortable: true,
   },
   {
-    key: "country_phone_code",
-    label: "Country Phone Code",
-    sortable: true,
-  },
-  {
     key: "phone",
     label: "Phone",
     sortable: true,

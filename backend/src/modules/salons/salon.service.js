@@ -177,7 +177,9 @@ const toSalonResponse = async (salon) => {
     address: normalizeLocalizedObject(salon.address),
     cancellation_policy: normalizeLocalizedObject(salon.cancellation_policy),
     country_phone_code: salon.country_phone_code,
+    city_phone_code: salon.city_phone_code,
     telephone: salon.telephone,
+    phone_number: salon.phone_number,
     latitude: salon.latitude,
     longitude: salon.longitude,
     opening_hours: parseJsonValue(salon.opening_hours),
@@ -274,7 +276,9 @@ const createSalon = async (payload) => {
     cancellation_policy:
       normalizeLocalizedOptional(payload.cancellation_policy) ?? null,
     country_phone_code: normalizeOptionalString(payload.country_phone_code),
+    city_phone_code: normalizeOptionalString(payload.city_phone_code),
     telephone: normalizeOptionalString(payload.telephone),
+    phone_number: normalizeOptionalString(payload.phone_number),
     latitude: normalizeDecimal(payload.latitude),
     longitude: normalizeDecimal(payload.longitude),
     opening_hours: normalizeOpeningHours(payload.opening_hours) ?? null,
@@ -334,8 +338,16 @@ const updateSalon = async (salonId, payload) => {
     salon.country_phone_code = normalizeOptionalString(payload.country_phone_code)
   }
 
+  if (payload.city_phone_code !== undefined) {
+    salon.city_phone_code = normalizeOptionalString(payload.city_phone_code)
+  }
+
   if (payload.telephone !== undefined) {
     salon.telephone = normalizeOptionalString(payload.telephone)
+  }
+
+  if (payload.phone_number !== undefined) {
+    salon.phone_number = normalizeOptionalString(payload.phone_number)
   }
 
   if (payload.latitude !== undefined) {

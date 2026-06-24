@@ -35,7 +35,15 @@ export default function SalonModel(sequelize, DataTypes) {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      city_phone_code: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       telephone: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      phone_number: {
         type: DataTypes.STRING,
         allowNull: true,
       },

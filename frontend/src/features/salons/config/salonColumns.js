@@ -41,11 +41,28 @@ export const salonColumns = [
     label: "Telephone",
     sortable: true,
     render: (salon) =>
-      [salon.country_phone_code, salon.telephone].filter(Boolean).join(" ") || "-",
+      [salon.country_phone_code, salon.city_phone_code, salon.telephone]
+        .filter(Boolean)
+        .join(" ") || "-",
     searchValue: (salon) =>
-      [salon.country_phone_code, salon.telephone].filter(Boolean).join(" "),
+      [salon.country_phone_code, salon.city_phone_code, salon.telephone]
+        .filter(Boolean)
+        .join(" "),
     sortValue: (salon) =>
-      [salon.country_phone_code, salon.telephone].filter(Boolean).join(" "),
+      [salon.country_phone_code, salon.city_phone_code, salon.telephone]
+        .filter(Boolean)
+        .join(" "),
+  },
+  {
+    key: "phone_number",
+    label: "Phone Number",
+    sortable: true,
+    render: (salon) =>
+      [salon.country_phone_code, salon.phone_number].filter(Boolean).join(" ") || "-",
+    searchValue: (salon) =>
+      [salon.country_phone_code, salon.phone_number].filter(Boolean).join(" "),
+    sortValue: (salon) =>
+      [salon.country_phone_code, salon.phone_number].filter(Boolean).join(" "),
   },
   {
     key: "isactive",

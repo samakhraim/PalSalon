@@ -49,7 +49,15 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      city_phone_code: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
       telephone: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      phone_number: {
         type: Sequelize.STRING,
         allowNull: true,
       },

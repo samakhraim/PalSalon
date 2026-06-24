@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, MapPin } from "lucide-react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import ImagePreview from "@/components/common/ImagePreview"
@@ -996,6 +996,98 @@ export default function FormRenderer({
             </p>
           )}
           {fieldError && <p className="text-sm text-destructive">{fieldError}</p>}
+        </div>
+      )
+    }
+
+    if (field.type === "mapDeveloperMode") {
+      const latitudeValue = getNestedValue(
+        formValues,
+        field.latitudeFieldName,
+        field.defaultLatitude ?? ""
+      )
+      const longitudeValue = getNestedValue(
+        formValues,
+        field.longitudeFieldName,
+        field.defaultLongitude ?? ""
+      )
+      const hasCoordinates =
+        String(latitudeValue ?? "").trim().length > 0 &&
+        String(longitudeValue ?? "").trim().length > 0
+      const mapLatitude = hasCoordinates ? latitudeValue : field.defaultLatitude
+      const mapLongitude = hasCoordinates ? longitudeValue : field.defaultLongitude
+      const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(
+        `${mapLatitude},${mapLongitude}`
+      )}&z=${field.zoom || 13}&output=embed`
+      const externalMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        field.locationLabel || "Nablus, Palestine"
+      )}`
+
+      return (
+        <div
+          key={field.name}
+          className={`space-y-3 rounded-xl border border-border bg-background p-4 ${spanClassName}`.trim()}
+        >
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
+                <p className="text-sm font-medium text-foreground">{field.label}</p>
+              </div>
+              {field.description && (
+                <p className="text-sm text-muted-foreground">{field.description}</p>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  updateMultipleFieldValues([
+                    [field.latitudeFieldName, String(field.defaultLatitude)],
+                    [field.longitudeFieldName, String(field.defaultLongitude)],
+                  ])
+                }}
+              >
+                Use Nablus Coordinates
+              </Button>
+              <Button type="button" variant="outline" asChild>
+                <a href={externalMapUrl} target="_blank" rel="noreferrer">
+                  Open in Google Maps
+                </a>
+              </Button>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-xl border border-border">
+            <iframe
+              title={field.locationLabel || "Google Map Developer Mode"}
+              src={mapSrc}
+              className="h-[280px] w-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+
+          <div className="grid gap-3 rounded-lg border border-dashed border-border/80 bg-muted/30 p-3 md:grid-cols-2">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Latitude
+              </p>
+              <p className="mt-1 text-sm text-foreground">
+                {String(latitudeValue || field.defaultLatitude)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Longitude
+              </p>
+              <p className="mt-1 text-sm text-foreground">
+                {String(longitudeValue || field.defaultLongitude)}
+              </p>
+            </div>
+          </div>
         </div>
       )
     }
