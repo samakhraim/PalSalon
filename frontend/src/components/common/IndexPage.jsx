@@ -12,6 +12,7 @@ export default function IndexPage({
   createLabel,
   createPath,
   createPermission,
+  managePermission,
   data,
   columns,
   actions,
@@ -21,6 +22,13 @@ export default function IndexPage({
 }) {
   const { user } = useAuth()
   const canManage = Boolean(
+    managePermission
+      ? hasPermission(user, managePermission)
+      : createPermission
+        ? hasPermission(user, createPermission)
+        : createPath
+  )
+  const canCreate = Boolean(
     createPermission ? hasPermission(user, createPermission) : createPath
   )
   const extendedColumns = useMemo(() => {
@@ -56,7 +64,7 @@ export default function IndexPage({
         emptyMessage={emptyMessage}
         addButtonLabel={createLabel}
         addButtonPath={createPath}
-        canCreate={canManage}
+        canCreate={canCreate}
         canManage={canManage}
       />
     </div>

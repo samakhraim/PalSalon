@@ -8,6 +8,7 @@ import LoginPage from "@/features/auth/pages/LoginPage"
 import CitiesPage from "@/features/cities/pages/CitiesPage"
 import CreateCityPage from "@/features/cities/pages/CreateCityPage"
 import EditCityPage from "@/features/cities/pages/EditCityPage"
+import ContactUsPage from "@/features/contactUs/pages/ContactUsPage"
 import DashboardPage from "@/features/dashboard/pages/DashboardPage"
 import CreateRolePage from "@/features/roles/pages/CreateRolePage"
 import EditRolePage from "@/features/roles/pages/EditRolePage"
@@ -46,6 +47,9 @@ export default function AppRoutes() {
           <Route element={<PermissionRoute permission="Cities-manage" />}>
             <Route path="/cities/create" element={<CreateCityPage />} />
             <Route path="/cities/:id/edit" element={<EditCityPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="ContactUs-view" />}>
+            <Route path="/contact-us" element={<ContactUsPage />} />
           </Route>
           <Route element={<PermissionRoute permission="Users-view" />}>
             <Route path="/users" element={<UsersPage />} />

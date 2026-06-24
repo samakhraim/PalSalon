@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize"
 
 import { sequelize } from "../config/db.js"
 import CityModel from "./city.model.js"
+import ContactUsModel from "./contactUs.model.js"
 import MediaModel from "./media.model.js"
 import PermissionModel from "./permission.model.js"
 import RoleModel from "./role.model.js"
@@ -14,6 +15,7 @@ export const User = UserModel(sequelize, DataTypes)
 export const Role = RoleModel(sequelize, DataTypes)
 export const Permission = PermissionModel(sequelize, DataTypes)
 export const City = CityModel(sequelize, DataTypes)
+export const ContactUsMessage = ContactUsModel(sequelize, DataTypes)
 export const Media = MediaModel(sequelize, DataTypes)
 export const UserRole = UserRoleModel(sequelize, DataTypes)
 export const RolePermission = RolePermissionModel(sequelize, DataTypes)
@@ -64,6 +66,7 @@ Permission.belongsToMany(User, {
 const db = {
   sequelize,
   City,
+  ContactUsMessage,
   Media,
   Permission,
   Role,

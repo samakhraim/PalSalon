@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "seed": "node src/database/seeders/user.seeder.js",
+    "seed": "sequelize-cli db:seed:all",
+    "seed:contact-us": "sequelize-cli db:seed --seed src/database/seeders/001-user.seeder.cjs",
     "migrate": "sequelize-cli db:migrate",
     "migrate:undo": "sequelize-cli db:migrate:undo"
   },

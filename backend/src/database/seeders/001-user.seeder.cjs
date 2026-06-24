@@ -24,6 +24,14 @@ function columnName(table, camelCase, snakeCase) {
   return camelCase;
 }
 
+async function ensureBulkInsert(queryInterface, tableName, rows) {
+  if (rows.length === 0) {
+    return;
+  }
+
+  await queryInterface.bulkInsert(tableName, rows);
+}
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     const now = new Date();
@@ -40,10 +48,8 @@ module.exports = {
       "guardName",
       "guard_name"
     );
-
     const userRoleUserColumn = columnName(userRolesTable, "userId", "user_id");
     const userRoleRoleColumn = columnName(userRolesTable, "roleId", "role_id");
-
     const rolePermissionRoleColumn = columnName(
       rolePermissionsTable,
       "roleId",
@@ -55,73 +61,86 @@ module.exports = {
       "permission_id"
     );
 
-    await queryInterface.bulkDelete("role_permissions", null, {});
-    await queryInterface.bulkDelete("user_roles", null, {});
-    await queryInterface.bulkDelete("permissions", null, {});
-    await queryInterface.bulkDelete("roles", null, {});
-    await queryInterface.bulkDelete("users", {
-      email: "admin@palsalon.com",
-    });
-
     const hashedPassword = await bcrypt.hash("password", 10);
 
-    await queryInterface.bulkInsert("users", [
-      {
-        name: "Admin",
-        email: "admin@palsalon.com",
-        phoneCountryCode: null,
-        phoneNumber: null,
-        password: hashedPassword,
-        role: "admin",
-        ...timestamps(usersTable, now),
-      },
-    ]);
+    const [existingAdminUser] = await queryInterface.sequelize.query(
+      "SELECT id FROM users WHERE email = 'admin@palsalon.com' LIMIT 1",
+      { type: Sequelize.QueryTypes.SELECT }
+    );
 
-    await queryInterface.bulkInsert("roles", [
-      {
-        name: "Admin",
+    if (existingAdminUser) {
+      await queryInterface.bulkUpdate(
+        "users",
+        {
+          name: "Admin",
+          password: hashedPassword,
+          role: "admin",
+          ...timestamps(usersTable, now),
+        },
+        { id: existingAdminUser.id }
+      );
+    } else {
+      await queryInterface.bulkInsert("users", [
+        {
+          name: "Admin",
+          email: "admin@palsalon.com",
+          phoneCountryCode: null,
+          phoneNumber: null,
+          password: hashedPassword,
+          role: "admin",
+          ...timestamps(usersTable, now),
+        },
+      ]);
+    }
+
+    const existingRoles = await queryInterface.sequelize.query(
+      "SELECT id, name FROM roles",
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+
+    const rolesToInsert = [
+      { name: "Admin" },
+      { name: "User" },
+    ]
+      .filter((role) => !existingRoles.some((existingRole) => existingRole.name === role.name))
+      .map((role) => ({
+        ...role,
         [roleGuardColumn]: "api",
         ...timestamps(rolesTable, now),
-      },
-      {
-        name: "User",
-        [roleGuardColumn]: "api",
-        ...timestamps(rolesTable, now),
-      },
-    ]);
+      }));
 
-    await queryInterface.bulkInsert("permissions", [
-      {
-        name: "Cities-view",
+    await ensureBulkInsert(queryInterface, "roles", rolesToInsert);
+
+    const existingPermissions = await queryInterface.sequelize.query(
+      "SELECT id, name FROM permissions",
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+
+    const permissionNames = [
+      "Cities-view",
+      "Cities-manage",
+      "Role-view",
+      "Role-manage",
+      "Users-view",
+      "Users-manage",
+      "ContactUs-view",
+      "ContactUs-manage",
+    ];
+
+    const permissionsToInsert = permissionNames
+      .filter(
+        (permissionName) =>
+          !existingPermissions.some(
+            (existingPermission) => existingPermission.name === permissionName
+          )
+      )
+      .map((permissionName) => ({
+        name: permissionName,
         [permissionGuardColumn]: "api",
         ...timestamps(permissionsTable, now),
-      },
-      {
-        name: "Cities-manage",
-        [permissionGuardColumn]: "api",
-        ...timestamps(permissionsTable, now),
-      },
-      {
-        name: "Role-view",
-        [permissionGuardColumn]: "api",
-        ...timestamps(permissionsTable, now),
-      },
-      {
-        name: "Role-manage",
-        [permissionGuardColumn]: "api",
-        ...timestamps(permissionsTable, now),
-      },
-      {
-        name: "Users-view",
-        [permissionGuardColumn]: "api",
-        ...timestamps(permissionsTable, now),
-      },
-      {
-        name: "Users-manage",
-        [permissionGuardColumn]: "api",
-        ...timestamps(permissionsTable, now),
-      },
-    ]);
+      }));
+
+    await ensureBulkInsert(queryInterface, "permissions", permissionsToInsert);
 
     const [adminUser] = await queryInterface.sequelize.query(
       "SELECT id FROM users WHERE email = 'admin@palsalon.com' LIMIT 1",
@@ -141,7 +160,20 @@ module.exports = {
     const adminRole = roles.find((role) => role.name === "Admin");
     const userRole = roles.find((role) => role.name === "User");
 
-    if (adminUser && adminRole) {
+    const existingUserRoles = await queryInterface.sequelize.query(
+      `SELECT ${userRoleUserColumn} AS userId, ${userRoleRoleColumn} AS roleId FROM user_roles`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+
+    if (
+      adminUser &&
+      adminRole &&
+      !existingUserRoles.some(
+        (userRoleItem) =>
+          Number(userRoleItem.userId) === Number(adminUser.id) &&
+          Number(userRoleItem.roleId) === Number(adminRole.id)
+      )
+    ) {
       await queryInterface.bulkInsert("user_roles", [
         {
           [userRoleUserColumn]: adminUser.id,
@@ -151,14 +183,31 @@ module.exports = {
       ]);
     }
 
+    const existingRolePermissions = await queryInterface.sequelize.query(
+      `SELECT ${rolePermissionRoleColumn} AS roleId, ${rolePermissionPermissionColumn} AS permissionId FROM role_permissions`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+
     if (adminRole) {
-      await queryInterface.bulkInsert(
-        "role_permissions",
-        permissions.map((permission) => ({
+      const missingAdminRolePermissions = permissions
+        .filter(
+          (permission) =>
+            !existingRolePermissions.some(
+              (rolePermission) =>
+                Number(rolePermission.roleId) === Number(adminRole.id) &&
+                Number(rolePermission.permissionId) === Number(permission.id)
+            )
+        )
+        .map((permission) => ({
           [rolePermissionRoleColumn]: adminRole.id,
           [rolePermissionPermissionColumn]: permission.id,
           ...timestamps(rolePermissionsTable, now),
-        }))
+        }));
+
+      await ensureBulkInsert(
+        queryInterface,
+        "role_permissions",
+        missingAdminRolePermissions
       );
     }
 
@@ -166,7 +215,15 @@ module.exports = {
       (permission) => permission.name === "Users-view"
     );
 
-    if (userRole && usersViewPermission) {
+    if (
+      userRole &&
+      usersViewPermission &&
+      !existingRolePermissions.some(
+        (rolePermission) =>
+          Number(rolePermission.roleId) === Number(userRole.id) &&
+          Number(rolePermission.permissionId) === Number(usersViewPermission.id)
+      )
+    ) {
       await queryInterface.bulkInsert("role_permissions", [
         {
           [rolePermissionRoleColumn]: userRole.id,
@@ -177,11 +234,38 @@ module.exports = {
     }
   },
 
-  async down(queryInterface) {
-    await queryInterface.bulkDelete("role_permissions", null, {});
-    await queryInterface.bulkDelete("user_roles", null, {});
-    await queryInterface.bulkDelete("permissions", null, {});
-    await queryInterface.bulkDelete("roles", null, {});
+  async down(queryInterface, Sequelize) {
+    const roles = await queryInterface.sequelize.query(
+      "SELECT id, name FROM roles WHERE name IN ('Admin', 'User')",
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+    const permissions = await queryInterface.sequelize.query(
+      "SELECT id, name FROM permissions WHERE name IN ('Cities-view','Cities-manage','Role-view','Role-manage','Users-view','Users-manage','ContactUs-view','ContactUs-manage')",
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+
+    const roleIds = roles.map((role) => role.id);
+    const permissionIds = permissions.map((permission) => permission.id);
+
+    if (roleIds.length > 0) {
+      await queryInterface.bulkDelete("user_roles", { roleId: roleIds });
+    }
+
+    if (roleIds.length > 0 && permissionIds.length > 0) {
+      await queryInterface.bulkDelete("role_permissions", {
+        roleId: roleIds,
+        permissionId: permissionIds,
+      });
+    }
+
+    if (permissionIds.length > 0) {
+      await queryInterface.bulkDelete("permissions", { id: permissionIds });
+    }
+
+    if (roleIds.length > 0) {
+      await queryInterface.bulkDelete("roles", { id: roleIds });
+    }
+
     await queryInterface.bulkDelete("users", {
       email: "admin@palsalon.com",
     });
