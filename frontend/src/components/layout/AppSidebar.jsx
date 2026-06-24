@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Link, NavLink, useLocation } from "react-router-dom"
 import {
   ChevronUp,
+  CircleHelp,
   LayoutDashboard,
   LogOut,
   MapPin,
@@ -127,6 +128,30 @@ const sidebarSections = [
             label: "Add City",
             to: "/cities/create",
             permission: "Cities-manage",
+            exact: true,
+          },
+        ],
+      },
+      {
+        key: "faqs",
+        type: "group",
+        label: "FAQ",
+        icon: CircleHelp,
+        basePath: "/faqs",
+        permissions: ["FAQ-view", "FAQ-manage"],
+        children: [
+          {
+            key: "faqs-list",
+            label: "List",
+            to: "/faqs",
+            permission: "FAQ-view",
+            exact: true,
+          },
+          {
+            key: "faqs-create",
+            label: "Add FAQ",
+            to: "/faqs/create",
+            permission: "FAQ-manage",
             exact: true,
           },
         ],

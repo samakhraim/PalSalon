@@ -57,4 +57,10 @@ export const contactUsColumns = [
     searchValue: (row) => (row.isRead ? "Read" : "Unread"),
     sortValue: (row) => (row.isRead ? 1 : 0),
   },
+  {
+    key: "createdAt",
+    label: "Created At",
+    type: "date",
+    sortable: true,
+  },
 ]

@@ -3,6 +3,7 @@ import { DataTypes } from "sequelize"
 import { sequelize } from "../config/db.js"
 import CityModel from "./city.model.js"
 import ContactUsModel from "./contactUs.model.js"
+import FaqModel from "./faq.model.js"
 import MediaModel from "./media.model.js"
 import PermissionModel from "./permission.model.js"
 import RoleModel from "./role.model.js"
@@ -16,6 +17,7 @@ export const Role = RoleModel(sequelize, DataTypes)
 export const Permission = PermissionModel(sequelize, DataTypes)
 export const City = CityModel(sequelize, DataTypes)
 export const ContactUsMessage = ContactUsModel(sequelize, DataTypes)
+export const Faq = FaqModel(sequelize, DataTypes)
 export const Media = MediaModel(sequelize, DataTypes)
 export const UserRole = UserRoleModel(sequelize, DataTypes)
 export const RolePermission = RolePermissionModel(sequelize, DataTypes)
@@ -67,6 +69,7 @@ const db = {
   sequelize,
   City,
   ContactUsMessage,
+  Faq,
   Media,
   Permission,
   Role,

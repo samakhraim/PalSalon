@@ -125,6 +125,8 @@ module.exports = {
       "Users-manage",
       "ContactUs-view",
       "ContactUs-manage",
+      "FAQ-view",
+      "FAQ-manage",
     ];
 
     const permissionsToInsert = permissionNames
@@ -240,7 +242,7 @@ module.exports = {
       { type: Sequelize.QueryTypes.SELECT }
     );
     const permissions = await queryInterface.sequelize.query(
-      "SELECT id, name FROM permissions WHERE name IN ('Cities-view','Cities-manage','Role-view','Role-manage','Users-view','Users-manage','ContactUs-view','ContactUs-manage')",
+      "SELECT id, name FROM permissions WHERE name IN ('Cities-view','Cities-manage','Role-view','Role-manage','Users-view','Users-manage','ContactUs-view','ContactUs-manage','FAQ-view','FAQ-manage')",
       { type: Sequelize.QueryTypes.SELECT }
     );
 
