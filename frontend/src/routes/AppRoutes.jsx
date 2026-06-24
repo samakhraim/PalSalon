@@ -19,6 +19,9 @@ import FaqsPage from "@/features/faqs/pages/FaqsPage"
 import CreateRolePage from "@/features/roles/pages/CreateRolePage"
 import EditRolePage from "@/features/roles/pages/EditRolePage"
 import RolesPage from "@/features/roles/pages/RolesPage"
+import CreateSalonOwnerPage from "@/features/salonOwners/pages/CreateSalonOwnerPage"
+import EditSalonOwnerPage from "@/features/salonOwners/pages/EditSalonOwnerPage"
+import SalonOwnersPage from "@/features/salonOwners/pages/SalonOwnersPage"
 import CreateUserPage from "@/features/users/pages/CreateUserPage"
 import EditUserPage from "@/features/users/pages/EditUserPage"
 import UsersPage from "@/features/users/pages/UsersPage"
@@ -63,6 +66,19 @@ export default function AppRoutes() {
           <Route element={<PermissionRoute permission="Customers-manage" />}>
             <Route path="/customers/create" element={<CreateCustomerPage />} />
             <Route path="/customers/:id/edit" element={<EditCustomerPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="SalonOwners-view" />}>
+            <Route path="/salon-owners" element={<SalonOwnersPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="SalonOwners-manage" />}>
+            <Route
+              path="/salon-owners/create"
+              element={<CreateSalonOwnerPage />}
+            />
+            <Route
+              path="/salon-owners/:id/edit"
+              element={<EditSalonOwnerPage />}
+            />
           </Route>
           <Route element={<PermissionRoute permission="FAQ-view" />}>
             <Route path="/faqs" element={<FaqsPage />} />

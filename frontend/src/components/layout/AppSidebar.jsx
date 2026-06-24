@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from "react-router-dom"
 import {
   ChevronUp,
   CircleHelp,
+  Store,
   LayoutDashboard,
   LogOut,
   MapPin,
@@ -152,6 +153,30 @@ const sidebarSections = [
             label: "Add Customer",
             to: "/customers/create",
             permission: "Customers-manage",
+            exact: true,
+          },
+        ],
+      },
+      {
+        key: "salon-owners",
+        type: "group",
+        label: "Salon Owners",
+        icon: Store,
+        basePath: "/salon-owners",
+        permissions: ["SalonOwners-view", "SalonOwners-manage"],
+        children: [
+          {
+            key: "salon-owners-list",
+            label: "List",
+            to: "/salon-owners",
+            permission: "SalonOwners-view",
+            exact: true,
+          },
+          {
+            key: "salon-owners-create",
+            label: "Add Salon Owner",
+            to: "/salon-owners/create",
+            permission: "SalonOwners-manage",
             exact: true,
           },
         ],

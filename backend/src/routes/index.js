@@ -8,6 +8,7 @@ import faqRoutes from "../modules/faqs/faq.routes.js"
 import mediaRoutes from "../modules/media/media.routes.js"
 import permissionRoutes from "../modules/permissions/permission.routes.js"
 import roleRoutes from "../modules/roles/role.routes.js"
+import salonOwnerRoutes from "../modules/salonOwners/salonOwner.routes.js"
 import userRoutes from "../modules/users/user.routes.js"
 
 const router = express.Router()
@@ -21,5 +22,6 @@ router.use("/users", userRoutes)
 router.use("/roles", roleRoutes)
 router.use("/permissions", permissionRoutes)
 router.use("/media", mediaRoutes)
+router.use("/salon-owners", salonOwnerRoutes)
 
 export default router

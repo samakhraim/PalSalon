@@ -9,6 +9,7 @@ import MediaModel from "./media.model.js"
 import PermissionModel from "./permission.model.js"
 import RoleModel from "./role.model.js"
 import RolePermissionModel from "./rolePermission.model.js"
+import SalonOwnerModel from "./salonOwner.model.js"
 import UserModel from "./user.model.js"
 import UserPermissionModel from "./userPermission.model.js"
 import UserRoleModel from "./userRole.model.js"
@@ -23,6 +24,7 @@ export const Faq = FaqModel(sequelize, DataTypes)
 export const Media = MediaModel(sequelize, DataTypes)
 export const UserRole = UserRoleModel(sequelize, DataTypes)
 export const RolePermission = RolePermissionModel(sequelize, DataTypes)
+export const SalonOwner = SalonOwnerModel(sequelize, DataTypes)
 export const UserPermission = UserPermissionModel(sequelize, DataTypes)
 
 User.belongsToMany(Role, {
@@ -76,6 +78,7 @@ const db = {
   Media,
   Permission,
   Role,
+  SalonOwner,
   User,
   UserPermission,
   UserRole,
