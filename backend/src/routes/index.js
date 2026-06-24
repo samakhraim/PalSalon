@@ -8,6 +8,7 @@ import faqRoutes from "../modules/faqs/faq.routes.js"
 import mediaRoutes from "../modules/media/media.routes.js"
 import permissionRoutes from "../modules/permissions/permission.routes.js"
 import roleRoutes from "../modules/roles/role.routes.js"
+import salonRoutes from "../modules/salons/salon.routes.js"
 import salonOwnerRoutes from "../modules/salonOwners/salonOwner.routes.js"
 import userRoutes from "../modules/users/user.routes.js"
 
@@ -23,5 +24,6 @@ router.use("/roles", roleRoutes)
 router.use("/permissions", permissionRoutes)
 router.use("/media", mediaRoutes)
 router.use("/salon-owners", salonOwnerRoutes)
+router.use("/salons", salonRoutes)
 
 export default router

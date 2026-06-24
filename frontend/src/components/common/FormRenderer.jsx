@@ -85,6 +85,16 @@ const hasValue = (value, field, files) => {
     return Boolean(files[field.name] || value)
   }
 
+  if (field.type === "imageGallery") {
+    const fileValue = files[field.name]
+
+    if (Array.isArray(fileValue)) {
+      return fileValue.length > 0
+    }
+
+    return Array.isArray(value) ? value.length > 0 : Boolean(value)
+  }
+
   return String(value ?? "").trim().length > 0
 }
 
@@ -214,6 +224,11 @@ export default function FormRenderer({
         continue
       }
 
+      if (Array.isArray(file)) {
+        nextPreviewUrls[fieldName] = file.map((item) => URL.createObjectURL(item))
+        continue
+      }
+
       nextPreviewUrls[fieldName] = URL.createObjectURL(file)
     }
 
@@ -221,6 +236,11 @@ export default function FormRenderer({
 
     return () => {
       Object.values(nextPreviewUrls).forEach((previewUrl) => {
+        if (Array.isArray(previewUrl)) {
+          previewUrl.forEach((item) => URL.revokeObjectURL(item))
+          return
+        }
+
         URL.revokeObjectURL(previewUrl)
       })
     }
@@ -257,6 +277,13 @@ export default function FormRenderer({
     setFiles((current) => ({
       ...current,
       [fieldName]: file,
+    }))
+  }
+
+  const updateMultipleFilesValue = (fieldName, fileList) => {
+    setFiles((current) => ({
+      ...current,
+      [fieldName]: fileList,
     }))
   }
 
@@ -350,6 +377,25 @@ export default function FormRenderer({
             formValues,
             { files, mode }
           )
+
+          if (validationError) {
+            nextErrors[field.name] = validationError
+          }
+        }
+
+        continue
+      }
+
+      if (field.type === "openingHours" || field.type === "dateList") {
+        const value = getNestedValue(formValues, field.name, getDefaultFieldValue(field))
+
+        if (field.required && !hasValue(value, field, files)) {
+          nextErrors[field.name] = `${field.label} is required.`
+          continue
+        }
+
+        if (field.validate) {
+          const validationError = field.validate(value, formValues, { files, mode })
 
           if (validationError) {
             nextErrors[field.name] = validationError
@@ -725,6 +771,247 @@ export default function FormRenderer({
             <p className="text-sm text-muted-foreground">{field.description}</p>
           )}
           {fieldError && <p className="text-sm text-destructive">{fieldError}</p>}
+        </div>
+      )
+    }
+
+    if (field.type === "openingHours") {
+      const days = field.days || []
+
+      return (
+        <div key={field.name} className={`space-y-3 ${spanClassName}`.trim()}>
+          <div className="space-y-1">
+            <Label htmlFor={fieldId}>
+              {field.label}
+              {field.required && <span className="text-destructive"> *</span>}
+            </Label>
+            {field.description && (
+              <p className="text-sm text-muted-foreground">{field.description}</p>
+            )}
+          </div>
+
+          <div className="space-y-3 rounded-xl border border-border bg-background p-4">
+            {days.map((day) => {
+              const dayKey = day.value
+              const isOpen = Boolean(
+                getNestedValue(formValues, `${field.name}.${dayKey}.is_open`, false)
+              )
+              const openingTime = getNestedValue(
+                formValues,
+                `${field.name}.${dayKey}.opening_time`,
+                ""
+              )
+              const closingTime = getNestedValue(
+                formValues,
+                `${field.name}.${dayKey}.closing_time`,
+                ""
+              )
+
+              return (
+                <div
+                  key={dayKey}
+                  className="grid gap-3 rounded-lg border border-border/70 p-3 md:grid-cols-[140px_auto_1fr_1fr]"
+                >
+                  <div className="flex items-center font-medium">{day.label}</div>
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      id={`${fieldId}-${dayKey}-toggle`}
+                      checked={isOpen}
+                      onCheckedChange={(checked) => {
+                        updateMultipleFieldValues([
+                          [`${field.name}.${dayKey}.is_open`, checked],
+                          [
+                            `${field.name}.${dayKey}.opening_time`,
+                            checked ? openingTime || day.defaultOpeningTime || "" : null,
+                          ],
+                          [
+                            `${field.name}.${dayKey}.closing_time`,
+                            checked ? closingTime || day.defaultClosingTime || "" : null,
+                          ],
+                        ])
+                        clearFieldError(field.name)
+                      }}
+                    />
+                    <Label htmlFor={`${fieldId}-${dayKey}-toggle`}>
+                      {isOpen ? "Open" : "Closed"}
+                    </Label>
+                  </div>
+                  <Input
+                    type="time"
+                    value={isOpen ? openingTime || "" : ""}
+                    disabled={!isOpen}
+                    onChange={(event) => {
+                      updateFieldValue(
+                        `${field.name}.${dayKey}.opening_time`,
+                        event.target.value || null
+                      )
+                      clearFieldError(field.name)
+                    }}
+                  />
+                  <Input
+                    type="time"
+                    value={isOpen ? closingTime || "" : ""}
+                    disabled={!isOpen}
+                    onChange={(event) => {
+                      updateFieldValue(
+                        `${field.name}.${dayKey}.closing_time`,
+                        event.target.value || null
+                      )
+                      clearFieldError(field.name)
+                    }}
+                  />
+                </div>
+              )
+            })}
+          </div>
+          {fieldError && <p className="text-sm text-destructive">{fieldError}</p>}
+        </div>
+      )
+    }
+
+    if (field.type === "dateList") {
+      const dates = Array.isArray(value) ? value : []
+
+      return (
+        <div key={field.name} className={`space-y-3 ${spanClassName}`.trim()}>
+          <div className="space-y-1">
+            <Label htmlFor={fieldId}>
+              {field.label}
+              {field.required && <span className="text-destructive"> *</span>}
+            </Label>
+            {field.description && (
+              <p className="text-sm text-muted-foreground">{field.description}</p>
+            )}
+          </div>
+
+          <div className="space-y-3 rounded-xl border border-border bg-background p-4">
+            {dates.map((dateValue, index) => (
+              <div key={`${field.name}-${index}`} className="flex items-center gap-3">
+                <Input
+                  type="date"
+                  value={dateValue || ""}
+                  onChange={(event) => {
+                    const nextDates = [...dates]
+                    nextDates[index] = event.target.value
+                    updateFieldValue(field.name, nextDates)
+                    clearFieldError(field.name)
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    updateFieldValue(
+                      field.name,
+                      dates.filter((_, currentIndex) => currentIndex !== index)
+                    )
+                    clearFieldError(field.name)
+                  }}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                updateFieldValue(field.name, [...dates, ""])
+                clearFieldError(field.name)
+              }}
+            >
+              Add Off Day
+            </Button>
+          </div>
+          {fieldError && <p className="text-sm text-destructive">{fieldError}</p>}
+        </div>
+      )
+    }
+
+    if (field.type === "imageGallery") {
+      const existingItems = Array.isArray(value) ? value : []
+      const previewItems = Array.isArray(previewUrls[field.name])
+        ? previewUrls[field.name]
+        : []
+
+      return (
+        <div key={field.name} className={`space-y-3 ${spanClassName}`.trim()}>
+          <div className="space-y-1">
+            <Label htmlFor={fieldId}>
+              {field.label}
+              {field.required && <span className="text-destructive"> *</span>}
+            </Label>
+            {field.description && (
+              <p className="text-sm text-muted-foreground">{field.description}</p>
+            )}
+          </div>
+
+          <Input
+            id={fieldId}
+            type="file"
+            accept={field.accept || "image/*"}
+            multiple
+            onChange={(event) =>
+              updateMultipleFilesValue(
+                field.name,
+                Array.from(event.target.files || [])
+              )
+            }
+          />
+
+          {previewItems.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {previewItems.map((previewItem, index) => (
+                <ImagePreview
+                  key={`${field.name}-preview-${index}`}
+                  image={previewItem}
+                  alt={`${field.label} ${index + 1}`}
+                  width={140}
+                  height={100}
+                />
+              ))}
+            </div>
+          ) : existingItems.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {existingItems.map((item, index) => (
+                <ImagePreview
+                  key={`${field.name}-existing-${item.id || index}`}
+                  image={item.url || item}
+                  alt={`${field.label} ${index + 1}`}
+                  width={140}
+                  height={100}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No gallery images selected yet.
+            </p>
+          )}
+
+          {Array.isArray(files[field.name]) && files[field.name].length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {files[field.name].length} image(s) selected.
+            </p>
+          )}
+          {fieldError && <p className="text-sm text-destructive">{fieldError}</p>}
+        </div>
+      )
+    }
+
+    if (field.type === "infoBlock") {
+      return (
+        <div
+          key={field.name}
+          className={`rounded-xl border border-dashed border-border bg-muted/30 p-4 ${spanClassName}`.trim()}
+        >
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-foreground">{field.label}</p>
+            {field.description && (
+              <p className="text-sm text-muted-foreground">{field.description}</p>
+            )}
+          </div>
         </div>
       )
     }

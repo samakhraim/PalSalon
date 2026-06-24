@@ -19,6 +19,9 @@ import FaqsPage from "@/features/faqs/pages/FaqsPage"
 import CreateRolePage from "@/features/roles/pages/CreateRolePage"
 import EditRolePage from "@/features/roles/pages/EditRolePage"
 import RolesPage from "@/features/roles/pages/RolesPage"
+import CreateSalonPage from "@/features/salons/pages/CreateSalonPage"
+import EditSalonPage from "@/features/salons/pages/EditSalonPage"
+import SalonsPage from "@/features/salons/pages/SalonsPage"
 import CreateSalonOwnerPage from "@/features/salonOwners/pages/CreateSalonOwnerPage"
 import EditSalonOwnerPage from "@/features/salonOwners/pages/EditSalonOwnerPage"
 import SalonOwnersPage from "@/features/salonOwners/pages/SalonOwnersPage"
@@ -79,6 +82,13 @@ export default function AppRoutes() {
               path="/salon-owners/:id/edit"
               element={<EditSalonOwnerPage />}
             />
+          </Route>
+          <Route element={<PermissionRoute permission="Salons-view" />}>
+            <Route path="/salons" element={<SalonsPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="Salons-manage" />}>
+            <Route path="/salons/create" element={<CreateSalonPage />} />
+            <Route path="/salons/:id/edit" element={<EditSalonPage />} />
           </Route>
           <Route element={<PermissionRoute permission="FAQ-view" />}>
             <Route path="/faqs" element={<FaqsPage />} />

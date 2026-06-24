@@ -9,6 +9,7 @@ import MediaModel from "./media.model.js"
 import PermissionModel from "./permission.model.js"
 import RoleModel from "./role.model.js"
 import RolePermissionModel from "./rolePermission.model.js"
+import SalonModel from "./salon.model.js"
 import SalonOwnerModel from "./salonOwner.model.js"
 import UserModel from "./user.model.js"
 import UserPermissionModel from "./userPermission.model.js"
@@ -24,6 +25,7 @@ export const Faq = FaqModel(sequelize, DataTypes)
 export const Media = MediaModel(sequelize, DataTypes)
 export const UserRole = UserRoleModel(sequelize, DataTypes)
 export const RolePermission = RolePermissionModel(sequelize, DataTypes)
+export const Salon = SalonModel(sequelize, DataTypes)
 export const SalonOwner = SalonOwnerModel(sequelize, DataTypes)
 export const UserPermission = UserPermissionModel(sequelize, DataTypes)
 
@@ -69,6 +71,26 @@ Permission.belongsToMany(User, {
   otherKey: "userId",
 })
 
+SalonOwner.hasMany(Salon, {
+  foreignKey: "salon_owner_id",
+  as: "salons",
+})
+
+Salon.belongsTo(SalonOwner, {
+  foreignKey: "salon_owner_id",
+  as: "salonOwner",
+})
+
+City.hasMany(Salon, {
+  foreignKey: "city_id",
+  as: "salons",
+})
+
+Salon.belongsTo(City, {
+  foreignKey: "city_id",
+  as: "city",
+})
+
 const db = {
   sequelize,
   City,
@@ -78,6 +100,7 @@ const db = {
   Media,
   Permission,
   Role,
+  Salon,
   SalonOwner,
   User,
   UserPermission,

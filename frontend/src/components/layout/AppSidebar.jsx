@@ -182,6 +182,30 @@ const sidebarSections = [
         ],
       },
       {
+        key: "salons",
+        type: "group",
+        label: "Salons",
+        icon: Store,
+        basePath: "/salons",
+        permissions: ["Salons-view", "Salons-manage"],
+        children: [
+          {
+            key: "salons-list",
+            label: "List",
+            to: "/salons",
+            permission: "Salons-view",
+            exact: true,
+          },
+          {
+            key: "salons-create",
+            label: "Add Salon",
+            to: "/salons/create",
+            permission: "Salons-manage",
+            exact: true,
+          },
+        ],
+      },
+      {
         key: "faqs",
         type: "group",
         label: "FAQ",
