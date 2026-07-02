@@ -123,6 +123,10 @@ module.exports = {
       "Cities-manage",
       "Customers-view",
       "Customers-manage",
+      "Intros-view",
+      "Intros-manage",
+      "Pages-view",
+      "Pages-manage",
       "Salons-view",
       "Salons-manage",
       "Services-view",
@@ -252,7 +256,7 @@ module.exports = {
       { type: Sequelize.QueryTypes.SELECT }
     );
     const permissions = await queryInterface.sequelize.query(
-      "SELECT id, name FROM permissions WHERE name IN ('Categories-view','Categories-manage','Cities-view','Cities-manage','Customers-view','Customers-manage','Salons-view','Salons-manage','Services-view','Services-manage','SalonOwners-view','SalonOwners-manage','Role-view','Role-manage','Users-view','Users-manage','ContactUs-view','ContactUs-manage','FAQ-view','FAQ-manage')",
+      "SELECT id, name FROM permissions WHERE name IN ('Categories-view','Categories-manage','Cities-view','Cities-manage','Customers-view','Customers-manage','Intros-view','Intros-manage','Pages-view','Pages-manage','Salons-view','Salons-manage','Services-view','Services-manage','SalonOwners-view','SalonOwners-manage','Role-view','Role-manage','Users-view','Users-manage','ContactUs-view','ContactUs-manage','FAQ-view','FAQ-manage')",
       { type: Sequelize.QueryTypes.SELECT }
     );
 

@@ -22,6 +22,12 @@ import FaqsPage from "@/features/faqs/pages/FaqsPage"
 import CreateRolePage from "@/features/roles/pages/CreateRolePage"
 import EditRolePage from "@/features/roles/pages/EditRolePage"
 import RolesPage from "@/features/roles/pages/RolesPage"
+import CreateIntroPage from "@/features/intros/pages/CreateIntroPage"
+import EditIntroPage from "@/features/intros/pages/EditIntroPage"
+import IntrosPage from "@/features/intros/pages/IntrosPage"
+import CreatePagePage from "@/features/pages/pages/CreatePagePage"
+import EditPagePage from "@/features/pages/pages/EditPagePage"
+import PagesPage from "@/features/pages/pages/PagesPage"
 import CreateSalonPage from "@/features/salons/pages/CreateSalonPage"
 import EditSalonPage from "@/features/salons/pages/EditSalonPage"
 import SalonsPage from "@/features/salons/pages/SalonsPage"
@@ -78,6 +84,20 @@ export default function AppRoutes() {
           </Route>
           <Route element={<PermissionRoute permission="Customers-view" />}>
             <Route path="/customers" element={<CustomersPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="Intros-view" />}>
+            <Route path="/intros" element={<IntrosPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="Intros-manage" />}>
+            <Route path="/intros/create" element={<CreateIntroPage />} />
+            <Route path="/intros/:id/edit" element={<EditIntroPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="Pages-view" />}>
+            <Route path="/pages" element={<PagesPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="Pages-manage" />}>
+            <Route path="/pages/create" element={<CreatePagePage />} />
+            <Route path="/pages/:id/edit" element={<EditPagePage />} />
           </Route>
           <Route element={<PermissionRoute permission="Customers-manage" />}>
             <Route path="/customers/create" element={<CreateCustomerPage />} />

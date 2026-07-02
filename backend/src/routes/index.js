@@ -7,6 +7,8 @@ import contactUsRoutes from "../modules/contactUs/contactUs.routes.js"
 import customerRoutes from "../modules/customers/customer.routes.js"
 import faqRoutes from "../modules/faqs/faq.routes.js"
 import mediaRoutes from "../modules/media/media.routes.js"
+import introRoutes from "./intro.routes.js"
+import pageRoutes from "./page.routes.js"
 import permissionRoutes from "../modules/permissions/permission.routes.js"
 import roleRoutes from "../modules/roles/role.routes.js"
 import salonRoutes from "../modules/salons/salon.routes.js"
@@ -22,6 +24,8 @@ router.use("/cities", cityRoutes)
 router.use("/contact-us", contactUsRoutes)
 router.use("/customers", customerRoutes)
 router.use("/faqs", faqRoutes)
+router.use("/intros", introRoutes)
+router.use("/pages", pageRoutes)
 router.use("/users", userRoutes)
 router.use("/roles", roleRoutes)
 router.use("/permissions", permissionRoutes)

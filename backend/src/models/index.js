@@ -6,7 +6,9 @@ import CityModel from "./city.model.js"
 import ContactUsModel from "./contactUs.model.js"
 import CustomerModel from "./customer.model.js"
 import FaqModel from "./faq.model.js"
+import IntroModel from "./intro.model.js"
 import MediaModel from "./media.model.js"
+import PageModel from "./page.model.js"
 import PermissionModel from "./permission.model.js"
 import RoleModel from "./role.model.js"
 import RolePermissionModel from "./rolePermission.model.js"
@@ -26,7 +28,9 @@ export const City = CityModel(sequelize, DataTypes)
 export const ContactUsMessage = ContactUsModel(sequelize, DataTypes)
 export const Customer = CustomerModel(sequelize, DataTypes)
 export const Faq = FaqModel(sequelize, DataTypes)
+export const Intro = IntroModel(sequelize, DataTypes)
 export const Media = MediaModel(sequelize, DataTypes)
+export const Page = PageModel(sequelize, DataTypes)
 export const UserRole = UserRoleModel(sequelize, DataTypes)
 export const RolePermission = RolePermissionModel(sequelize, DataTypes)
 export const Salon = SalonModel(sequelize, DataTypes)
@@ -134,7 +138,9 @@ const db = {
   ContactUsMessage,
   Customer,
   Faq,
+  Intro,
   Media,
+  Page,
   Permission,
   Role,
   Salon,
