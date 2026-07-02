@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize"
 
 import { sequelize } from "../config/db.js"
+import CategoryModel from "./category.model.js"
 import CityModel from "./city.model.js"
 import ContactUsModel from "./contactUs.model.js"
 import CustomerModel from "./customer.model.js"
@@ -11,6 +12,8 @@ import RoleModel from "./role.model.js"
 import RolePermissionModel from "./rolePermission.model.js"
 import SalonModel from "./salon.model.js"
 import SalonOwnerModel from "./salonOwner.model.js"
+import ServiceModel from "./service.model.js"
+import ServicePriceOptionModel from "./servicePriceOption.model.js"
 import UserModel from "./user.model.js"
 import UserPermissionModel from "./userPermission.model.js"
 import UserRoleModel from "./userRole.model.js"
@@ -18,6 +21,7 @@ import UserRoleModel from "./userRole.model.js"
 export const User = UserModel(sequelize, DataTypes)
 export const Role = RoleModel(sequelize, DataTypes)
 export const Permission = PermissionModel(sequelize, DataTypes)
+export const Category = CategoryModel(sequelize, DataTypes)
 export const City = CityModel(sequelize, DataTypes)
 export const ContactUsMessage = ContactUsModel(sequelize, DataTypes)
 export const Customer = CustomerModel(sequelize, DataTypes)
@@ -27,6 +31,8 @@ export const UserRole = UserRoleModel(sequelize, DataTypes)
 export const RolePermission = RolePermissionModel(sequelize, DataTypes)
 export const Salon = SalonModel(sequelize, DataTypes)
 export const SalonOwner = SalonOwnerModel(sequelize, DataTypes)
+export const Service = ServiceModel(sequelize, DataTypes)
+export const ServicePriceOption = ServicePriceOptionModel(sequelize, DataTypes)
 export const UserPermission = UserPermissionModel(sequelize, DataTypes)
 
 User.belongsToMany(Role, {
@@ -91,8 +97,39 @@ Salon.belongsTo(City, {
   as: "city",
 })
 
+Salon.hasMany(Service, {
+  foreignKey: "salon_id",
+  as: "services",
+})
+
+Service.belongsTo(Salon, {
+  foreignKey: "salon_id",
+  as: "salon",
+})
+
+Category.hasMany(Service, {
+  foreignKey: "category_id",
+  as: "services",
+})
+
+Service.belongsTo(Category, {
+  foreignKey: "category_id",
+  as: "category",
+})
+
+Service.hasMany(ServicePriceOption, {
+  foreignKey: "service_id",
+  as: "price_options",
+})
+
+ServicePriceOption.belongsTo(Service, {
+  foreignKey: "service_id",
+  as: "service",
+})
+
 const db = {
   sequelize,
+  Category,
   City,
   ContactUsMessage,
   Customer,
@@ -102,6 +139,8 @@ const db = {
   Role,
   Salon,
   SalonOwner,
+  Service,
+  ServicePriceOption,
   User,
   UserPermission,
   UserRole,

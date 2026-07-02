@@ -5,8 +5,11 @@ import ProtectedRoute from "@/components/common/ProtectedRoute"
 import MainLayout from "@/components/layout/MainLayout"
 import { useAuth } from "@/hooks/useAuth"
 import LoginPage from "@/features/auth/pages/LoginPage"
+import CategoriesPage from "@/features/categories/pages/CategoriesPage"
+import CreateCategoryPage from "@/features/categories/pages/CreateCategoryPage"
 import CitiesPage from "@/features/cities/pages/CitiesPage"
 import CreateCityPage from "@/features/cities/pages/CreateCityPage"
+import EditCategoryPage from "@/features/categories/pages/EditCategoryPage"
 import EditCityPage from "@/features/cities/pages/EditCityPage"
 import ContactUsPage from "@/features/contactUs/pages/ContactUsPage"
 import CreateCustomerPage from "@/features/customers/pages/CreateCustomerPage"
@@ -22,6 +25,9 @@ import RolesPage from "@/features/roles/pages/RolesPage"
 import CreateSalonPage from "@/features/salons/pages/CreateSalonPage"
 import EditSalonPage from "@/features/salons/pages/EditSalonPage"
 import SalonsPage from "@/features/salons/pages/SalonsPage"
+import CreateServicePage from "@/features/services/pages/CreateServicePage"
+import EditServicePage from "@/features/services/pages/EditServicePage"
+import ServicesPage from "@/features/services/pages/ServicesPage"
 import CreateSalonOwnerPage from "@/features/salonOwners/pages/CreateSalonOwnerPage"
 import EditSalonOwnerPage from "@/features/salonOwners/pages/EditSalonOwnerPage"
 import SalonOwnersPage from "@/features/salonOwners/pages/SalonOwnersPage"
@@ -53,6 +59,13 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route element={<PermissionRoute permission="Categories-view" />}>
+            <Route path="/categories" element={<CategoriesPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="Categories-manage" />}>
+            <Route path="/categories/create" element={<CreateCategoryPage />} />
+            <Route path="/categories/:id/edit" element={<EditCategoryPage />} />
+          </Route>
           <Route element={<PermissionRoute permission="Cities-view" />}>
             <Route path="/cities" element={<CitiesPage />} />
           </Route>
@@ -89,6 +102,13 @@ export default function AppRoutes() {
           <Route element={<PermissionRoute permission="Salons-manage" />}>
             <Route path="/salons/create" element={<CreateSalonPage />} />
             <Route path="/salons/:id/edit" element={<EditSalonPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="Services-view" />}>
+            <Route path="/services" element={<ServicesPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="Services-manage" />}>
+            <Route path="/services/create" element={<CreateServicePage />} />
+            <Route path="/services/:id/edit" element={<EditServicePage />} />
           </Route>
           <Route element={<PermissionRoute permission="FAQ-view" />}>
             <Route path="/faqs" element={<FaqsPage />} />

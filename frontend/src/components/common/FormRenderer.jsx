@@ -3,6 +3,7 @@ import { Eye, EyeOff, MapPin } from "lucide-react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import ImagePreview from "@/components/common/ImagePreview"
+import PriceOptionsField from "@/components/common/PriceOptionsField"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -677,6 +678,21 @@ export default function FormRenderer({
             options={field.options}
             value={value}
             onChange={(nextValue) => updateFieldValue(field.name, nextValue)}
+            error={fieldError}
+          />
+        </div>
+      )
+    }
+
+    if (field.type === "priceOptions") {
+      return (
+        <div key={field.name} className={`space-y-3 ${spanClassName}`.trim()}>
+          <PriceOptionsField
+            field={field}
+            fieldId={fieldId}
+            value={value}
+            onChange={(nextValue) => updateFieldValue(field.name, nextValue)}
+            onClearError={() => clearFieldError(field.name)}
             error={fieldError}
           />
         </div>
