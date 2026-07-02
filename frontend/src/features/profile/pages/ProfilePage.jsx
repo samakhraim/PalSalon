@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { Eye, EyeOff, Mail, Phone, UserCircle2 } from "lucide-react"
+import { Eye, EyeOff, Mail, Phone, ShieldCheck, UserCircle2 } from "lucide-react"
 
 import PageHeader from "@/components/common/PageHeader"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -29,6 +29,7 @@ const EMPTY_PROFILE_FORM = {
   email: "",
   phoneCountryCode: "",
   phoneNumber: "",
+  role: "",
 }
 
 const EMPTY_PASSWORD_FORM = {
@@ -115,6 +116,11 @@ export default function ProfilePage() {
           email: currentProfile.email || "",
           phoneCountryCode: currentProfile.phoneCountryCode || "",
           phoneNumber: currentProfile.phoneNumber || "",
+          role:
+            currentProfile.roles?.[0] ||
+            (currentProfile.role
+              ? currentProfile.role.charAt(0).toUpperCase() + currentProfile.role.slice(1)
+              : ""),
         })
       } catch (error) {
         setErrorMessage(error?.response?.data?.message || "Unable to load profile")
@@ -252,6 +258,10 @@ export default function ProfilePage() {
                   .join(" ") || "No phone number"}
               </span>
             </div>
+            <div className="flex items-center gap-2 md:col-span-2">
+              <ShieldCheck className="h-4 w-4" />
+              <span>{profileForm.role || "No role assigned"}</span>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -317,6 +327,20 @@ export default function ProfilePage() {
                     }
                     placeholder="599123456"
                   />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="profile-role">Role</Label>
+                  <Input
+                    id="profile-role"
+                    value={profileForm.role}
+                    disabled
+                    readOnly
+                    placeholder="Role"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Your role is managed by administrators and cannot be changed here.
+                  </p>
                 </div>
               </div>
 
