@@ -329,19 +329,6 @@ export default function ProfilePage() {
                   />
                 </div>
 
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="profile-role">Role</Label>
-                  <Input
-                    id="profile-role"
-                    value={profileForm.role}
-                    disabled
-                    readOnly
-                    placeholder="Role"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Your role is managed by administrators and cannot be changed here.
-                  </p>
-                </div>
               </div>
 
               <Separator />
