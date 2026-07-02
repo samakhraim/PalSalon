@@ -10,6 +10,7 @@ import mediaRoutes from "../modules/media/media.routes.js"
 import introRoutes from "./intro.routes.js"
 import pageRoutes from "./page.routes.js"
 import permissionRoutes from "../modules/permissions/permission.routes.js"
+import profileRoutes from "./profile.routes.js"
 import roleRoutes from "../modules/roles/role.routes.js"
 import salonRoutes from "../modules/salons/salon.routes.js"
 import salonOwnerRoutes from "../modules/salonOwners/salonOwner.routes.js"
@@ -26,6 +27,7 @@ router.use("/customers", customerRoutes)
 router.use("/faqs", faqRoutes)
 router.use("/intros", introRoutes)
 router.use("/pages", pageRoutes)
+router.use("/profile", profileRoutes)
 router.use("/users", userRoutes)
 router.use("/roles", roleRoutes)
 router.use("/permissions", permissionRoutes)

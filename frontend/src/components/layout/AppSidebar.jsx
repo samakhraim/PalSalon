@@ -410,9 +410,11 @@ function SidebarUserMenu() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <UserCircle2 className="mr-2 h-4 w-4" />
-          Profile
+        <DropdownMenuItem asChild>
+          <Link to="/profile">
+            <UserCircle2 className="mr-2 h-4 w-4" />
+            Profile
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout}>

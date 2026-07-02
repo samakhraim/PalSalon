@@ -28,6 +28,7 @@ import IntrosPage from "@/features/intros/pages/IntrosPage"
 import CreatePagePage from "@/features/pages/pages/CreatePagePage"
 import EditPagePage from "@/features/pages/pages/EditPagePage"
 import PagesPage from "@/features/pages/pages/PagesPage"
+import ProfilePage from "@/features/profile/pages/ProfilePage"
 import CreateSalonPage from "@/features/salons/pages/CreateSalonPage"
 import EditSalonPage from "@/features/salons/pages/EditSalonPage"
 import SalonsPage from "@/features/salons/pages/SalonsPage"
@@ -65,6 +66,7 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route element={<PermissionRoute permission="Categories-view" />}>
             <Route path="/categories" element={<CategoriesPage />} />
           </Route>

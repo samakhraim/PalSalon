@@ -1,4 +1,5 @@
-import { Bell, ChevronDown, LogOut, Search, Sparkles } from "lucide-react"
+import { Bell, ChevronDown, LogOut, Search, Sparkles, UserCircle2 } from "lucide-react"
+import { Link } from "react-router-dom"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -92,7 +93,12 @@ export default function Header() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>User Menu</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/profile">
+                  <UserCircle2 className="mr-2 h-4 w-4" />
+                  My Account
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem>Preferences</DropdownMenuItem>
               <DropdownMenuItem>Notifications</DropdownMenuItem>
               <DropdownMenuSeparator />
